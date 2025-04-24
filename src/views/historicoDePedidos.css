@@ -1,0 +1,36 @@
+.historico-pedidos {
+    padding: 20px;
+  }
+  
+  .pedido {
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pedido-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .pedido-itens ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .repetir-pedido {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .repetir-pedido:hover {
+    background-color: #218838;
+  }
+  

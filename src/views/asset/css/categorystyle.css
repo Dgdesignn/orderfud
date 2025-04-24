@@ -1,0 +1,100 @@
+
+
+/*Estilização de cadastro de categorias*/
+:root{
+    --primary-color:#ff7f00;
+    --primary-50:#ff800069;
+    --white:#ffffff;
+}
+
+.form-container {
+    background: var(--light);
+    border-radius: 20px;
+    padding: 24px;
+    flex: 1;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.form-container h2 {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: var(--dark);
+}
+.form-group {
+    margin-bottom: 16px;
+}
+.form-group label {
+    display: block;
+    font-size: 14px;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--grey);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--light);
+    color: var(--dark);
+}
+.form-group input:focus,.form-group select:focus {
+border-color: #ff7f00;
+}
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+.btn-submit {
+    background: var(--blue);
+    color: var(--light);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+.btn-submit:hover {
+    background-color: #e67e22; /* Laranja mais escuro no hover */
+    transform: translateY(-3px);
+}
+
+
+/* estilização das tabelas */
+#categoria-apge table .btn-cadastro{
+    padding:18px 28px;
+    background-color: var(--primary-color);
+    color:#fff;
+    border:none;
+    border-radius: 12px;
+    font-size: 18px;
+}
+
+:root{
+    --primary-color:#ff7f00;
+    --primary-50:#ff800069;
+    --white:#ffffff;
+}
+.actions{
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    min-height: 110px;
+}
+.actions .btn.btn-edit,
+.actions .btn.btn-delete{
+	background-color: var(--primary-50);
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 3px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;  
+    transition: all .12s;
+    border-radius: 8px;
+}

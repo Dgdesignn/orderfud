@@ -1,0 +1,231 @@
+/* estilização das tabelas */
+
+:root{
+    --primary-color:#ff7f00;
+    --primary-50:#ff800069;
+    --white:#ffffff;
+}
+
+.col-2{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.col-2 div input {
+    width: 100%;
+}
+
+.col-2 div select{
+    width: 100%;
+}
+.profile-photo img{
+    width: 100%;
+    background-image: cover;
+    border-radius: 8px;
+}
+
+.profile-photo{
+    width: 100px;
+    cursor: pointer;
+}
+
+.img-box{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 20px;
+}
+/*
+#funcionario-apge{
+    width: 72rem;
+    margin: 0 auto;
+}
+
+#funcionario-apge table{
+    padding:1rem;
+    width: 100%;
+    border: none;
+}
+
+#funcionario-apge table .btn-cadastro{
+    padding:18px 28px;
+    background-color: var(--primary-color);
+    color:#fff;
+    border:none;
+    border-radius: 12px;
+    font-size: 18px;
+}
+
+.lista {
+    background-color: #fff;
+    border-radius: 50px;
+}
+
+.lista tr{
+    border-bottom: thin solid #bbb;
+}
+
+#funcionario-apge table, th, td{
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: none;
+
+}
+
+#funcionario-apge thead th{
+    padding: 2rem 0;
+    color:#999;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+#funcionario-apge .conteudo{
+    
+    width: 100%;
+    padding: 5rem;
+    
+
+}
+
+#funcionario-apge .conteudo td{
+    padding: 1rem;
+}
+*/
+
+
+/* estilização dos buttons editar e excluir */
+.actions{
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    min-height: 110px;
+}
+.actions .edit-btn,
+.actions .delete-btn {
+    background-color:var(--primary-50);
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 3px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;  
+    transition: all .12s;
+    border-radius: 8px;
+}
+   
+.actions .edit-btn:hover,
+.actions .delete-btn:hover {
+    background-color: var(--primary-color);
+}
+
+
+
+/* estilização do modal*/
+.modal {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4); 
+}
+
+/* Conteúdo do Modal */
+.modal-content {
+
+    background-color: #fefefe;
+    padding: 40px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    width: 80%; 
+    max-width: 560px; 
+}
+
+#employeeForm {
+    background-color: #fff;
+   
+    border-radius: 8px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Fechar o Modal */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Estilo do Formulário */
+h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+input, select{
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #ff7f00;
+}
+
+#employeeForm button{
+    padding: 12px 20px;
+    font-size: 20px;
+    border-radius: 10px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    cursor: pointer;
+    transition: all .12s;
+    border: none;
+}
+
+button:hover {
+    background-color: #e67e22; 
+    transform: translateY(-3px);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,53 @@
+
+body{
+    background-color: #eee;
+}
+
+.carteira {
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  
+  .saldo-atual {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .saldo-atual .valor {
+    font-size: 2.2rem;
+    color: #27ae60;
+    font-weight: bold;
+  }
+  
+  .btn-recarga {
+    margin-top: 10px;
+    background-color: #fd7238;
+    color: white;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .historico-transacoes ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .historico-transacoes li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .historico-transacoes .entrada {
+    color: #27ae60;
+  }
+  
+  .historico-transacoes .saida {
+    color: #e74c3c;
+  }
+  
