@@ -61,8 +61,12 @@ if (!class_exists('CategoryController')){
             }
             return $arquivo;
         }   
+        public function buscarCategoriaPorNome($nomeCategoria){
+            return $this->model-> buscarCategoriaPorNome($nomeCategoria);
+        }
     
     }
+    
 }
 
 ?>

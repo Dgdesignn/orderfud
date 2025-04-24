@@ -1,30 +1,37 @@
 <?php
 
-if($_SERVER["REQUEST_METHOD"]== "POST"){
-    
-    if(isset($_POST['editarCategoria'])){
-        $categoria=$_POST['categoria'];
-        $idCategoria =$_POST['idCategoria'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['editarCategoria'])) {
+        $categoria = $_POST['categoria'];
+        $idCategoria = $_POST['idCategoria'];
         $category->update($categoria, $idCategoria);
-    }else{  
-    $categoria=$_POST["categoria"];
-    $imagem =$_FILES;
-    if( empty($categoria)){
-        echo "<pstyle='color: #f00;'>Erro: Necessário preencher todos os campos</p>";
-    }else{
-        $resultado=$category->cadastrarCategoria($categoria, $imagem);
-        print_r($resultado);
-        if($resultado){
-           echo '<script>
-                    alert("carrinho criado com sucesso!");
-                    window.location.href = document.referrer;
-                </script>';
-        }else{
-            echo "Erro: Não foi possível realizar o cadastro.";
+    } else {
+        $categoria = trim($_POST["categoria"]);
+        $imagem = $_FILES;
+
+        if (empty($categoria)) {
+            echo "<p style='color: #f00;'>Erro: Necessário preencher todos os campos</p>";
+        } else {
+            // Verificar se já existe uma categoria com o mesmo nome
+            $categoriaExistente = $category->buscarCategoriaPorNome($categoria);
+
+            if ($categoriaExistente) {
+                echo "<script>alert('Erro: Já existe uma categoria com esse nome!'); window.history.back();</script>";
+            } else {
+                $resultado = $category->cadastrarCategoria($categoria, $imagem);
+                if ($resultado) {
+                    echo '<script>
+                            alert("Categoria cadastrada com sucesso!");
+                            window.location.href = document.referrer;
+                          </script>';
+                } else {
+                    echo "Erro: Não foi possível realizar o cadastro.";
+                }
+            }
         }
     }
-    }
 }
+
 ?>
   
 </html>

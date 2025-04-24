@@ -43,3 +43,20 @@ window.onclick = function(event) {
         closeModal();
     }
 };
+
+
+// Na página do funcionário
+function verificarNovosPedidos() {
+    fetch('api/pedido/listar')
+        .then(response => response.json())
+        .then(pedidos => {
+            // Atualizar a interface com os novos pedidos
+            atualizarListaPedidos(pedidos);
+            
+            // Verificar novamente após 30 segundos
+            setTimeout(verificarNovosPedidos, 30000);
+        });
+}
+
+// Iniciar quando a página carregar
+document.addEventListener('DOMContentLoaded', verificarNovosPedidos);

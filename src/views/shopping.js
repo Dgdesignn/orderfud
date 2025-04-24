@@ -141,16 +141,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Finalizar compra
     checkoutBtn.addEventListener('click', function() {
-        if (cartProducts.length > 0) {
-            alert(`Compra finalizada! Total: ${formatKz(cartTotal.textContent.replace(' Kz', ''))}`);
-            cartProducts = [];
-            updateCart();
-            toggleCart();
-        } else {
+        if (cartProducts.length === 0) {
             alert('Seu carrinho está vazio!');
+            return;
         }
+    
+        // Criar formulário dinâmico para enviar os dados
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'processar_pedido.php';
+        
+        // Adicionar campo para produtos
+        const produtosInput = document.createElement('input');
+        produtosInput.type = 'hidden';
+        produtosInput.name = 'produtos';
+        produtosInput.value = JSON.stringify(cartProducts);
+        form.appendChild(produtosInput);
+        
+        // Adicionar outros campos necessários (como ID do cliente)
+        const clienteInput = document.createElement('input');
+        clienteInput.type = 'hidden';
+        clienteInput.name = 'id_cliente';
+        clienteInput.value = localStorage.getItem('user_id'); // Adapte conforme seu sistema
+        form.appendChild(clienteInput);
+        
+        // Enviar formulário
+        document.body.appendChild(form);
+        form.submit();
     });
-
     // Favoritos (opcional)
     document.querySelectorAll('.menu-item-fav').forEach(fav => {
         fav.addEventListener('click', (e) => {
@@ -186,3 +204,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 */
+
+// FILTRAR PRODUTOS PELO NOME
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const produtos = document.querySelectorAll('.menu-item');
+
+    searchInput.addEventListener('input', function () {
+        const termo = searchInput.value.toLowerCase().trim();
+
+        produtos.forEach(produto => {
+            const nomeProduto = produto.querySelector('.menu-item-name').textContent.toLowerCase();
+            const descricaoProduto = produto.querySelector('.menu-item-description').textContent.toLowerCase();
+
+            if (nomeProduto.includes(termo) || descricaoProduto.includes(termo)) {
+                produto.style.display = 'block';
+            } else {
+                produto.style.display = 'none';
+            }
+        });
+    });
+});

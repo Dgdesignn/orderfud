@@ -75,5 +75,18 @@ class CategoryModel{
             return [];
         }
     }
+    public function buscarCategoriaPorNome($nomeCategoria) {
+        try {
+            $sql = "SELECT * FROM Categoria WHERE nome = :nome";
+            $query= $this->connection->prepare($sql);
+            $query->bindParam(":nome", $nomeCategoria);
+            $query->execute();
+        
+            return $query->fetch(PDO::FETCH_ASSOC); // retorna array se encontrou, false se não
+        } catch (PDOException $e) {
+            echo "Erro: " . $e->getMessage();
+           
+        }
+    }
 }
 ?>
