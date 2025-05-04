@@ -64,6 +64,10 @@ if (!class_exists('CategoryController')){
         public function buscarCategoriaPorNome($nomeCategoria){
             return $this->model-> buscarCategoriaPorNome($nomeCategoria);
         }
+
+        public function buscarCategoriaPorId($id){
+            return $this->model-> buscarCategoriaPorId($id);
+        }
     
     }
     

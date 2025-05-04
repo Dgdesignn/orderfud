@@ -60,9 +60,9 @@ class ClientModel{
 
     public function editar($id, $nome, $telefone, $senha,  ){
         try {
-            $sql = "UPDATE cliente SET nome = :nome, telefone = :telefone, senha = :senha, WHERE id=:id";
+            $sql = "UPDATE cliente SET nome = :nome, telefone = :telefone, senha = :senha, WHERE idCliente=:idCliente";
             $query = $this->connection ->prepare($sql);
-            $query->bindParam(':id', $id);
+            $query->bindParam(':idCliente', $id);
             $query->bindParam(':nome', $nome);
             $query->bindParam(':telefone', $telefone);
             $query->bindParam(':senha', $senha);
@@ -78,31 +78,31 @@ class ClientModel{
 
     public function deletar($id){
         try {
-            $sql = " DELETE FROM cliente WHERE id =:id";
+            $sql = " DELETE FROM cliente WHERE idCliente =:idCliente";
             $query=$this->connection->prepare($sql);
-            $query->bindParam(':id', $id);
+            $query->bindParam(':idCliente', $id);
             return $query->execute();
         } catch (PDOException $e) {
            echo "erro".$e->getMessage();
         }
     }
     public function login($telefone, $senha){
-       try {
-        $sql = "SELECT * FROM cliente WHERE telefone=:telefone";
-        $query=$this->connection->prepare($sql);
-        $query->bindParam(':telefone', $telefone);
-        $query->execute();
-       $user = $query->fetchAll(PDO::FETCH_ASSOC);
-       if($user && password_verify($senha, $user['senha']) ){
-        return $user;
-       }else{
-        return false;
-       }
-     }catch (PDOException $e) {
-          return false;
-     }
-
-      
+        try {
+            $sql = "SELECT * FROM cliente WHERE telefone = :telefone";
+            $query = $this->connection->prepare($sql);
+            $query->bindParam(':telefone', $telefone);
+            $query->execute();
+            
+            $user = $query->fetch(PDO::FETCH_ASSOC);
+            
+            if ($user && password_verify($senha, $user['senha'])) {
+                return $user;
+            }
+            return false;
+        } catch (PDOException $e) {
+            error_log("Erro no login: " . $e->getMessage());
+            return false;
+        }
     }
     public function verificarTelefone($telefone){
         try {
@@ -140,7 +140,7 @@ class ClientModel{
     public function bloquearCliente($id){
         try {
             // 1. Primeiro busca o status atual
-            $sqlSelect = "SELECT bloqueado FROM cliente WHERE id = ?";
+            $sqlSelect = "SELECT bloqueado FROM cliente WHERE idCliente = ?";
             $querySelect = $this->connection->prepare($sqlSelect);
             $querySelect->execute([$id]);
             $result = $querySelect->fetch(PDO::FETCH_ASSOC);
@@ -153,7 +153,7 @@ class ClientModel{
             $novoStatus = $result['bloqueado'] ? 0 : 1;
             
             // 3. Atualiza o status
-            $sqlUpdate = "UPDATE cliente SET bloqueado = ? WHERE id = ?";
+            $sqlUpdate = "UPDATE cliente SET bloqueado = ? WHERE idCliente = ?";
             $queryUpdate = $this->connection->prepare($sqlUpdate);
             return $queryUpdate->execute([$novoStatus, $id]);
             
@@ -163,7 +163,22 @@ class ClientModel{
         }
     }
 
-   
-    
+    public function buscarClientesComTotalPedidos() {
+        try {
+            $sql = "SELECT 
+                        c.*, 
+                        COUNT(p.idPedido) as total_pedidos
+                    FROM cliente c
+                    LEFT JOIN pedido p ON c.idCliente = p.fk_Cliente_idCliente
+                    GROUP BY c.idCliente";
+                    
+            $query = $this->connection->prepare($sql);
+            $query->execute();
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            echo "Erro ao buscar clientes: " . $e->getMessage();
+            return [];
+        }
+    }
 }
 ?>

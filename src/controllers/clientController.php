@@ -56,8 +56,8 @@ class ClientController{
         return $arquivo;
     }   
 
-    public function buscarClientes( ){
-        return $this->model->buscarClientes();
+    public function buscarClientes() {
+        return $this->model->buscarClientesComTotalPedidos();
     }
     public function buscarCliente($coluna, $valor ){
         return $this->model->buscarCliente($coluna, $valor);
@@ -70,14 +70,44 @@ class ClientController{
     }
 
     public function login($telefone, $senha){
-       $user= $this->model->login($telefone, $senha);
-       if($user){
-        $_SESSION['user'] = $user;
-       }else{
-            return 'credencias inválidas';
-       }
-
+        $user = $this->model->login($telefone, $senha);
+        
+        if($user){
+            // Iniciar a sessão se ainda não estiver iniciada
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
+            
+            // Armazenar dados do usuário na sessão
+            $_SESSION['client'] = [
+                'id' => $user['id'],
+                'nome' => $user['nome'],
+                'telefone' => $user['telefone']
+            ];
+            
+            return true;
+        }
+        
+        return false;
     }
+
+    // Adicionar método para verificar se está logado
+    public function isLoggedIn(){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        return isset($_SESSION['client']);
+    }
+
+    // Adicionar método para logout
+    public function logout(){
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+        unset($_SESSION['client']);
+        session_destroy();
+    }
+
     public function totalClientes(){
         return $this->model->totalClientes();
 

@@ -1,10 +1,3 @@
-<?php
-require "../controllers/categoryController.php";
-
-$categorias = new CategoryController();
-$listaCategoria = $categorias->buscarCategoria();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -25,6 +18,7 @@ $listaCategoria = $categorias->buscarCategoria();
     crossorigin="anonymous"
     referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="shopping.css?=123">
+  <link rel="stylesheet" href="asset/css/cart.css">
 </head>
 
 <body>
@@ -32,7 +26,7 @@ $listaCategoria = $categorias->buscarCategoria();
   <header class="header">
     <div class="container">
       <nav class="navbar">
-        <a href="#" class="logo">OrderFüd</a>
+        <a href="?rota=home" class="logo">OrderFüd</a>
         <ul class="nav-menu">
           <form action="#">
             <div class="form-input">
@@ -40,36 +34,40 @@ $listaCategoria = $categorias->buscarCategoria();
               <button type="submit" class="search-btn"><i class='bx bx-search'></i></button>
             </div>
           </form>
-
         </ul>
         <div class="nav-buttons">
           <a href="#" class="nav-icon" id="cart-icon">
             <i class='bx bxs-cart'></i>
             <span class="cart-count" id="cart-count">0</span>
           </a>
-          <a href="cadastro1.php" class="nav-icon">
+          <a href="#" class="nav-icon">
             <i class='bx bxs-user'></i>
-            <span class="cart-count">0</span>
           </a>
         </div>
-
       </nav>
     </div>
   </header>
 
-  <!-- Carrinho de compras -->
+  <!-- Carrinho de compras 
   <div id="cart" class="cart">
-    <h3>Produtos no Carrinho</h3>
-    <div id="cart-items"></div>
+    <div class="cart-header">
+        <h3>Seu Pedido</h3>
+        <button class="cart-close">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div id="cart-items" class="cart-items">
+     Items serão adicionados dinamicamente 
+    </div>
     <div class="cart-footer">
-      <div class="cart-total">
-        <span>Total:</span>
-        <span id="cart-total">$0.00</span>
-      </div>
-      <button class="btn-orange" id="checkout-btn">Finalizar Compra</button>
+        <div class="cart-total">
+            Total: <span id="cart-total">0,00 Kz</span>
+        </div>
+        <button id="checkout-btn" class="btn btn-primary">Finalizar Pedido</button>
     </div>
   </div>
-  </div>
+  -->
+
 
   <!-- Seção Home imagem-->
   <div class="hero">
@@ -80,65 +78,100 @@ $listaCategoria = $categorias->buscarCategoria();
 
   <!-- Seção Menu -->
   <section class="menu" id="menu">
-
     <!--categorias-->
     <div class="menu-tabs">
-      <div class="menu-tab active">Tudo</div>
-      <div class="menu-tab">Fastfood</div>
-      <div class="menu-tab">Frutas</div>
-      <div class="menu-tab">Doces</div>
-      <div class="menu-tab">Salgados</div>
-      <div class="menu-tab">Bebidas</div>
+      <div class="menu-tab active" data-category="all">Tudo</div>
+      <?php foreach ($listaCategoria as $categoria): ?>
+        <div class="menu-tab" data-category="<?= $categoria['idCategoria'] ?>">
+          <?= $categoria['categoria'] ?>
+        </div>
+      <?php endforeach; ?>
     </div>
 
     <!--cards dos produtos-->
     <div class="container">
-      <div class="container" id="FastFood">
-        <div class="category-header">
-          <h3>FastFood</h3>
-          <div class="arrow-group">
-            <button class="arrow round">←</button>
-            <button class="arrow round">→</button>
-          </div>
-        </div>
-
-        <div class="menu-grid">
-          <?php
-          require "../controllers/productController.php";
-          $produtos = new ProductController();
-          $resultado = $produtos->buscarCategoria();
-          ?>
-
-          <?php foreach ($resultado as $produto): ?>
-            <div class="menu-item">
-              <div class="menu-item-img" style="background-image: url(<?= $produto['imagem'] ?>)">
-                <div class="menu-item-fav">
-                  <i class="fas fa-star"></i>
+        <?php foreach ($listaCategoria as $categoria): 
+            // Busca produtos específicos desta categoria
+            $produtosPorCategoria = $produtos->buscarPorCategoria($categoria['idCategoria']);
+        ?>
+            <div class="category-section" id="category-<?= $categoria['idCategoria'] ?>" style="display: none;">
+                <div class="category-header">
+                    <h3><?= $categoria['categoria'] ?></h3>
+                    <div class="arrow-group">
+                        <button class="arrow round" onclick="scrollCategory('<?= $categoria['idCategoria'] ?>', 'left')">←</button>
+                        <button class="arrow round" onclick="scrollCategory('<?= $categoria['idCategoria'] ?>', 'right')">→</button>
+                    </div>
                 </div>
-              </div>
-              <div class="menu-item-content">
-                <p class="menu-item-category"><?= $produto['Categoria'] ?></p>
-                <h3 class="menu-item-name"><?= $produto['nome'] ?></h3>
-                <p class="menu-item-description"><?= $produto['descricao'] ?></p>
-                <div class="menu-item-bottom">
-                  <div class="menu-item-price"><?= number_format($produto['preco'], 2, ',', '.') ?> Kz</div>
-                  <!-- Botão com dados dinâmicos do produto -->
-                  <div
-                    class="menu-item-btn"
-                    data-name="<?= htmlspecialchars($produto['nome']) ?>"
-                    data-price="<?= $produto['preco'] ?>"
-                    data-img="<?= $produto['imagem'] ?>">
-                    <i class="fas fa-plus"></i>
-                  </div>
+
+                <div class="menu-grid" id="grid-<?= $categoria['idCategoria'] ?>">
+                    <?php if (!empty($produtosPorCategoria)): ?>
+                        <?php foreach ($produtosPorCategoria as $produto): ?>
+                            <div class="menu-item">
+                                <div class="menu-item-img" style="background-image: url(<?= $produto['imagem'] ?>)">
+                                    <div class="menu-item-fav">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="menu-item-content">
+                                    <p class="menu-item-category"><?= $produto['Categoria'] ?></p>
+                                    <h3 class="menu-item-name"><?= $produto['nome'] ?></h3>
+                                    <p class="menu-item-description"><?= $produto['descricao'] ?></p>
+                                    <div class="menu-item-bottom">
+                                        <div class="menu-item-price"><?= number_format($produto['preco'], 2, ',', '.') ?> Kz</div>
+                                        <div class="menu-item-btn" 
+                                             data-id="<?= $produto['idProduto'] ?>"
+                                             data-name="<?= htmlspecialchars($produto['nome']) ?>"
+                                             data-price="<?= $produto['preco'] ?>"
+                                             data-img="<?= $produto['imagem'] ?>">
+                                            <i class="fas fa-plus"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Nenhum produto encontrado nesta categoria.</p>
+                    <?php endif; ?>
                 </div>
-              </div>
             </div>
-          <?php endforeach; ?>
+        <?php endforeach; ?>
+
+        <!-- Seção "Todos" que será mostrada por padrão -->
+        <div class="category-section" id="category-all">
+            <div class="menu-grid">
+                <?php 
+                // Busca todos os produtos
+                $todosProdutos = $produtos->buscarCategoria();
+                foreach ($todosProdutos as $produto): 
+                ?>
+                    <div class="menu-item">
+                        <div class="menu-item-img" style="background-image: url(<?= $produto['imagem'] ?>)">
+                            <div class="menu-item-fav">
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="menu-item-content">
+                            <p class="menu-item-category"><?= $produto['Categoria'] ?></p>
+                            <h3 class="menu-item-name"><?= $produto['nome'] ?></h3>
+                            <p class="menu-item-description"><?= $produto['descricao'] ?></p>
+                            <div class="menu-item-bottom">
+                                <div class="menu-item-price"><?= number_format($produto['preco'], 2, ',', '.') ?> Kz</div>
+                                <div class="menu-item-btn" 
+                                     data-id="<?= $produto['idProduto'] ?>"
+                                     data-name="<?= htmlspecialchars($produto['nome']) ?>"
+                                     data-price="<?= $produto['preco'] ?>"
+                                     data-img="<?= $produto['imagem'] ?>">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
-        <hr class="divider" />
+    </div>
   </section>
 
-  <script src="shopping.js?=123"></script>
 </body>
 
 </html>

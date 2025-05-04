@@ -26,6 +26,18 @@ if (isset($_SESSION['mensagem'])) {
     unset($_SESSION['tipo_mensagem']);
 } 
 
+function getInitials($name) {
+    $words = explode(' ', trim($name));
+    $initials = '';
+    
+    if (count($words) >= 2) {
+        $initials = strtoupper(substr($words[0], 0, 1) . substr(end($words), 0, 1));
+    } else {
+        $initials = strtoupper(substr($name, 0, 2));
+    }
+    
+    return $initials;
+}
 
 ?>
 <body>
@@ -96,6 +108,53 @@ if (isset($_SESSION['mensagem'])) {
 .btn i {
     font-size: 14px;
 }
+
+.profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ff7f00;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.pedidos-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #666;
+}
+
+.pedidos-count i {
+    color: #ff7f00;
+    font-size: 18px;
+}
+
+.pedidos-count span {
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+}
     </style>
 </body>
  <div class="table-data">
@@ -107,7 +166,8 @@ if (isset($_SESSION['mensagem'])) {
                     <th>ID</th>
                     <th>IMAGEM</th>
                     <th>NOME</th>
-                    <th>TELEFONE</th> 
+                    <th>TELEFONE</th>
+                    <th>PEDIDOS</th>
                     <th>STATUS</th> 
                     <th>AÇÕES</th>
                 </tr>
@@ -123,31 +183,44 @@ if (isset($_SESSION['mensagem'])) {
                 echo "</pre>";
 
                     foreach ($clientes as $cliente) {
-                        $bloqueado = $cliente['bloqueado'] ?? 0; // Trata NULL como 0
+                        $bloqueado = $cliente['bloqueado'] ?? 0;
                         $statusBloqueio = $bloqueado ? 'Desbloquear' : 'Bloquear';
                         $iconeBloqueio = $bloqueado ? 'bx bx-lock-open-alt' : 'bx bx-lock-alt';
                         $classeBotao = $bloqueado ? 'btn-success' : 'btn-warning';
+                        
+                        // Gerar o HTML para a foto ou iniciais
+                        $profileHtml = '';
+                        if (!empty($cliente['imagem']) && $cliente['imagem'] !== 'null') {
+                            $profileHtml = "<img src='{$cliente['imagem']}' alt='{$cliente['nome']}'>";
+                        } else {
+                            $initials = getInitials($cliente['nome']);
+                            $profileHtml = "<div class='profile-initials'>{$initials}</div>";
+                        }
                                         
                         echo "<tr>
-                                <td>{$cliente['id']}</td>
-                                <td><a href='#' class='profile'><img src='{$cliente['imagem']}'></a></td>
+                                <td>{$cliente['idCliente']}</td>
+                                <td><a href='#' class='profile'>{$profileHtml}</a></td>
                                 <td>{$cliente['nome']}</td>
                                 <td>{$cliente['telefone']}</td>
+                                <td>
+                                    <div class='pedidos-count'>
+                                        <i class='bx bx-shopping-bag'></i>
+                                        <span>{$cliente['total_pedidos']}</span>
+                                    </div>
+                                </td>
                                 <td>
                                     <span class='status " . ($bloqueado ? 'blocked' : 'active') . "'>"
                                         . ($bloqueado ? 'Bloqueado' : 'Ativo') .
                                     "</span>
                                 </td>
                                 <td>
-                                    <a href='dashboarbadmin.php?rota=cliente&idBloquear={$cliente['id']}' class='btn {$classeBotao}' onclick='return confirm(\"Deseja realmente " . strtolower($statusBloqueio) . " este cliente?\")'>
+                                    <a href='dashboarbadmin.php?rota=cliente&idBloquear={$cliente['idCliente']}' class='btn {$classeBotao}' onclick='return confirm(\"Deseja realmente " . strtolower($statusBloqueio) . " este cliente?\")'>
                                         <i class='{$iconeBloqueio}'></i> {$statusBloqueio}
                                     </a>
-                                    <a href='dashboarbadmin.php?rota=cliente&idEditarCliente={$cliente['id']}' class='btn btn-danger' onclick='return confirm(\"Deseja realmente remover este cliente?\")'>
+                                    <a href='dashboarbadmin.php?rota=cliente&idEditarCliente={$cliente['idCliente']}' class='btn btn-danger' onclick='return confirm(\"Deseja realmente remover este cliente?\")'>
                                         <i class='bx bx-trash'></i> Remover
                                     </a>
                                 </td>
-                                     
-                                
                             </tr>";
                     }
                     include "eliminarClient.php";

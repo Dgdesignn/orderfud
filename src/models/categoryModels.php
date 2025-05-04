@@ -88,5 +88,18 @@ class CategoryModel{
            
         }
     }
+    public function buscarCategoriaPorId($id) {
+        try {
+            $sql = "SELECT * FROM Categoria WHERE idCategoria = :idCategoria";
+            $query= $this->connection->prepare($sql);
+            $query->bindParam(":idCategoria", $id);
+            $query->execute();
+        
+            return $query->fetch(PDO::FETCH_ASSOC); // retorna array se encontrou, false se não
+        } catch (PDOException $e) {
+            echo "Erro: " . $e->getMessage();
+           
+        }
+    }
 }
 ?>

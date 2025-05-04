@@ -1,3 +1,15 @@
+<?php
+require "../controllers/categoryController.php";
+require "../controllers/productController.php";
+
+$categorias = new CategoryController();
+$produtos = new ProductController();
+
+// Busca todas as categorias
+$listaCategoria = $categorias->buscarCategoria();
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,6 +30,7 @@
       referrerpolicy="no-referrer"
     />
     <link rel="stylesheet" href="stela.css" />
+    <link rel="stylesheet" href="asset/css/cart.css">
   </head>
   <body>
     <?php  
@@ -31,7 +44,10 @@
     <!-- Header & Navigation -->
     <header class="header">
      <?php
-        include "webesite2.php";
+        // Verifica se a rota não é "home" antes de incluir webesite2.php
+        if( $_GET['rota'] !== 'produtos') {
+            include "webesite2.php";
+        }
      ?>
      
 
@@ -68,5 +84,10 @@
     
 
     <script src="script.js?=123"></script>
+    <?php include "./includes/clients/cart.php"; ?>
+    <?php include "./includes/clients/cart-modal.php"; ?>
+    <script src="shopping.js?v=1.0.1"></script>
   </body>
 </html>
+
+

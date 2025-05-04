@@ -96,7 +96,8 @@
 					include "./pages/editar.php";
 					break;
 				default :
-					echo "Pagina nao encontrada";
+					$_SESSION['user']['tipo']=='Funcionária'?include "./pages/pedidos.php":include "./pages/home.php";
+
 
 			}
 		?>

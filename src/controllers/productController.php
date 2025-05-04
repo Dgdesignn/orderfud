@@ -20,49 +20,86 @@
         public function updateProduto($nome, $descricao, $preco, $categoria, $id){
             return $this->model->updateProduto($nome, $descricao, $preco, $categoria, $id);
         }
-        public function cadastrarProduto($nome, $descricao, $preco, $categoria, $imagem){
-            // Processar upload da imagem
-            $novaImagem = $this->upload($imagem);
-            
-            // Se o upload falhou, retorne false
-            if($novaImagem === null) {
+        public function cadastrarProduto($nome, $descricao, $preco, $categoria, $imagem) {
+            try {
+                // Validações
+                if (empty($nome) || empty($descricao) || $preco <= 0 || empty($categoria)) {
+                    throw new Exception("Todos os campos são obrigatórios");
+           
+                }
+                // Processar upload da imagem
+                $caminhoImagem = $this->processarUploadImagem($imagem);
+               
+                // Cadastrar no banco
+                $r =  $this->model->cadastrarProduto($nome, $descricao, $preco, $categoria, $caminhoImagem);
+         
+                return $r;
+            } catch (Exception $e) {
+                error_log('Erro ao cadastrar produto: ' . $e->getMessage());
                 return false;
             }
-            
-            return $this->model->cadastrarProduto($nome, $descricao, $preco, $categoria, $novaImagem);
         }
         
-        private function upload($file){
-            // Verifica se houve algum erro no upload
-            if($file['error'] !== UPLOAD_ERR_OK) {
-                error_log("Erro no upload: " . $file['error']);
-                return null;
+        private function processarUploadImagem($imagem) {
+            if ($imagem['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('Erro no upload da imagem');
             }
-            
-            // Configurações
-            $diretorioDestino = 'uploads/Produtos/';
-            $nomeArquivoUnico = $diretorioDestino . uniqid() . '-' . basename($file['name']);
-            
-            // Cria diretório se não existir
-            if (!is_dir($diretorioDestino)) {
-                mkdir($diretorioDestino, 0777, true);
+
+            // Ajusta o caminho para a pasta uploads/produto dentro de views
+            $diretorioUpload = __DIR__ . '/../views/uploads/produto/';
+            error_log("Tentando salvar em: " . $diretorioUpload); // Debug
+
+            // Garante que o diretório existe
+            if (!is_dir($diretorioUpload)) {
+                if (!mkdir($diretorioUpload, 0777, true)) {
+                    throw new Exception('Não foi possível criar o diretório de upload');
+                }
             }
-            
-            // Move o arquivo
-            if (move_uploaded_file($file['tmp_name'], $nomeArquivoUnico)) {
-                return $nomeArquivoUnico;
-            } else {
-                error_log("Falha ao mover arquivo para: " . $nomeArquivoUnico);
-                return null;
+
+            // Verifica permissões
+            if (!is_writable($diretorioUpload)) {
+                throw new Exception('Diretório sem permissão de escrita: ' . $diretorioUpload);
             }
-        } 
+
+            // Gera nome único para o arquivo
+            $extensao = strtolower(pathinfo($imagem['name'], PATHINFO_EXTENSION));
+            $nomeArquivo = uniqid() . '.' . $extensao;
+            $caminhoCompleto = $diretorioUpload . $nomeArquivo;
+
+            // Tenta mover o arquivo
+            if (!move_uploaded_file($imagem['tmp_name'], $caminhoCompleto)) {
+                error_log("Falha ao mover arquivo para: " . $caminhoCompleto);
+                throw new Exception('Falha ao salvar imagem');
+            }
+
+            // Retorna o caminho relativo para salvar no banco
+            return 'uploads/produto/' . $nomeArquivo;
+        }
     
         public function totalProdutos(){
             return $this->model->totalProdutos();
         }
     
+        public function buscarPorCategoria($idCategoria) {
+            return $this->model->buscarPorCategoria($idCategoria);
+        }
         
-        
+        public function alterarStatusProduto($idProduto, $estado) {
+            try {
+                if (empty($idProduto)) {
+                    throw new Exception("ID do produto não informado");
+                }
+                
+                // Converte para inteiro para garantir tipo correto
+                $idProduto = intval($idProduto);
+                $estado = intval($estado);
+                
+                return $this->model->alterarStatus($idProduto, $estado);
+            } catch (Exception $e) {
+                error_log('Erro ao alterar estado do produto: ' . $e->getMessage());
+                return false;
+            }
+        }
     }
  }
 
