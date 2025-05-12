@@ -5,7 +5,7 @@ class OrderModel {
     public function __construct($connection){
         $this->connection = $connection;
     } 
-
+ 
     public function criarPedido($clienteId, $produtos, $observacoes, $total) {
         try {
             $this->connection->beginTransaction();
@@ -36,16 +36,17 @@ class OrderModel {
             $stmtProdutos = $this->connection->prepare($sqlProdutos);
             foreach ($produtos as $produto) {
                 // Validar se todas as chaves necessárias existem
-                if (!isset($produto['idProduto']) || !isset($produto['quantity']) || !isset($produto['price'])) {
+                if (!isset($produto['idProduto']) || !isset($produto['quantidade']) || !isset($produto['preco'])) {
                     throw new Exception("Dados do produto incompletos");
                 }
-
+                   
                 $stmtProdutos->execute([
                     ':pedido_id' => $pedidoId,
                     ':produto_id' => intval($produto['idProduto']), // Mudado de 'id' para 'idProduto'
-                    ':quantidade' => intval($produto['quantity']),
-                    ':preco' => floatval($produto['price'])
+                    ':quantidade' => intval($produto['quantidade']),
+                    ':preco' => floatval($produto['preco'])
                 ]);
+               
             }
 
             $this->connection->commit();

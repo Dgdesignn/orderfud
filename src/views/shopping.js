@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const checkoutBtn = document.getElementById('checkout-btn');
     const closeCartBtn = document.querySelector('.cart-close');
     const addButtons = document.querySelectorAll('.menu-item-btn');
-
     let cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
     let isCartOpen = false;
 
@@ -188,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
             updateCart();
         }
     }
-
+ 
     // Eventos
     if (cartIconParent) {
         cartIconParent.addEventListener('click', function(e) {

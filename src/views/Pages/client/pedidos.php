@@ -38,7 +38,7 @@
         <div class="no-pedidos">
             <i class='bx bx-shopping-bag'></i>
             <p>Você ainda não fez nenhum pedido</p>
-            <a href="shopping.php" class="btn-primary">Fazer Primeiro Pedido</a>
+            <a href="website.php?rota=produtos" class="btn-primary">Fazer Primeiro Pedido</a>
         </div>
     <?php endif; ?>
 </div> 

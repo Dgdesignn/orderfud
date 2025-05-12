@@ -80,7 +80,7 @@ class ClientController{
             
             // Armazenar dados do usuário na sessão
             $_SESSION['client'] = [
-                'id' => $user['id'],
+                'id' => $user['idCliente'],
                 'nome' => $user['nome'],
                 'telefone' => $user['telefone']
             ];

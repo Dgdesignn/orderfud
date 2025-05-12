@@ -147,10 +147,11 @@
                 <div class="menu-item-bottom">
                   <div class="menu-item-price"><?php echo number_format($produto['preco'], 2, ',', '.') . ' Kz'; ?></div>
                   <div class="menu-item-btn" 
+                       data-id="<?php echo $produto['idProduto']; ?>"
                        data-name="<?php echo $produto['nome']; ?>"
                        data-price="<?php echo $produto['preco']; ?>"
                        data-img="<?php echo $produto['imagem']; ?>">
-                    <i class="fas fa-plus"></i>
+                    <i class="fas fa-plus"></i> 
                   </div>
                 </div>
               </div>

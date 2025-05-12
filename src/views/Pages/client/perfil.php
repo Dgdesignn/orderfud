@@ -19,10 +19,7 @@
                 <label>Nome</label>
                 <input type="text" value="<?php echo $_SESSION['client']['nome']; ?>" readonly>
             </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" value="<?php echo $_SESSION['client']['email']; ?>" readonly>
-            </div>
+          
             <div class="form-group">
                 <label>Telefone</label>
                 <input type="tel" value="<?php echo $_SESSION['client']['telefone']; ?>" readonly>

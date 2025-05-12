@@ -10,7 +10,7 @@
     
     // Se já estiver logado, redirecionar
     if($cliente->isLoggedIn()){
-        header("Location: shopping.php");
+        header("Location: website.php?rota=produtos");
         exit();
     }
 
@@ -34,7 +34,7 @@
                     if (cartProducts.length > 0) {
                         window.location.href = 'checkout.php';
                     } else {
-                        window.location.href = 'shopping.php';
+                        window.location.href = 'website.php?rota=produtos';
                     }
                 </script>";
                 exit();

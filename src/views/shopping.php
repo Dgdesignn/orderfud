@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+ 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,7 +40,7 @@
             <i class='bx bxs-cart'></i>
             <span class="cart-count" id="cart-count">0</span>
           </a>
-          <a href="#" class="nav-icon">
+          <a href="dashboard-client.php" class="nav-icon">
             <i class='bx bxs-user'></i>
           </a>
         </div>
@@ -110,7 +110,7 @@
                                 <div class="menu-item-img" style="background-image: url(<?= $produto['imagem'] ?>)">
                                     <div class="menu-item-fav">
                                         <i class="fas fa-star"></i>
-                                    </div>
+                                    </div> 
                                 </div>
                                 <div class="menu-item-content">
                                     <p class="menu-item-category"><?= $produto['Categoria'] ?></p>

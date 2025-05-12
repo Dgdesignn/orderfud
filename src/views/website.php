@@ -18,6 +18,8 @@ $listaCategoria = $categorias->buscarCategoria();
     <title>OrderFüd</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+
     <link
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&family=Outfit:wght@200;300;400;500;600;700&display=swap"
       rel="stylesheet"
@@ -86,7 +88,7 @@ $listaCategoria = $categorias->buscarCategoria();
     <script src="script.js?=123"></script>
     <?php include "./includes/clients/cart.php"; ?>
     <?php include "./includes/clients/cart-modal.php"; ?>
-    <script src="shopping.js?v=1.0.1"></script>
+    <script src="shopping.js?v=1.0"></script>
   </body>
 </html>
 

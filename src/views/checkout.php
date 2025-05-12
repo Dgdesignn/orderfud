@@ -40,7 +40,7 @@ $orderController = new OrderController();
                     <span id="cart-total-summary">0,00 Kz</span>
                 </div>
             </div>
-
+ 
             <form method="POST" action="../controllers/processar_pedido.php">
                 <div class="form-group">
                     <label for="observacoes">Observações do Pedido:</label>
@@ -68,16 +68,19 @@ $orderController = new OrderController();
                 window.location.href = 'shopping.php';
                 return;
             }
-            console.log(cartProducts);
-            // Formatar os produtos com o ID correto
+
+            // Formatar os produtos corretamente
             const formattedProducts = cartProducts.map(product => ({
-                idProduto: product.id, // Garantindo que o ID do produto seja enviado
-                quantity: product.quantity,
-                price: product.price,
-                name: product.name
+                idProduto: parseInt(product.id), // Garante que é número
+                quantidade: parseInt(product.quantity), // Renomeado de quantity para quantidade
+                preco: parseFloat(product.price),
+                nome: product.name
             }));
             
             updateOrderSummary(formattedProducts);
+
+            // Atualizar o input hidden com os dados formatados
+            document.getElementById('produtos-input').value = JSON.stringify(formattedProducts);
         });
 
         function updateOrderSummary(products) {
@@ -88,21 +91,19 @@ $orderController = new OrderController();
             summaryContainer.innerHTML = '';
             
             products.forEach(product => {
-                const itemTotal = product.price * product.quantity;
+                const itemTotal = product.preco * product.quantidade;
                 total += itemTotal;
 
                 summaryContainer.innerHTML += `
                     <div class="summary-item">
-                        <span>${product.name} x ${product.quantity}</span>
+                        <span>${product.nome} x ${product.quantidade}</span>
                         <span>${formatCurrency(itemTotal)}</span>
                     </div>
                 `;
             });
 
-            // Atualizar total e campos hidden com os dados formatados
             totalElement.textContent = formatCurrency(total);
             document.getElementById('total-input').value = total.toFixed(2);
-            document.getElementById('produtos-input').value = JSON.stringify(products); // Enviando produtos formatados
         }
 
         function formatCurrency(value) {

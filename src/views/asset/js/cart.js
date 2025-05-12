@@ -1,4 +1,4 @@
-alert('teste');
+alert('teste'); 
 
 // Função para adicionar produto ao carrinho
 function addToCart(id, name, price) {

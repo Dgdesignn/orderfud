@@ -11,13 +11,15 @@
             <li><a href="#contact" class="nav-link">Contacto</a></li>
           </ul>
           <div class="nav-buttons">
-            <a href="#" class="nav-icon">
-              <i class="fas fa-user"></i>
+            <a href="#" class="nav-icon" id="cart-icon">
+              <i class='bx bxs-cart'></i>
+              <span class="cart-count" id="cart-count">0</span>
             </a>
-            <a href="#" class="nav-icon">
-              <i class="fas fa-shopping-cart"></i>
-              <span class="cart-count">3</span>
-            </a>
+           
+                <a href="dashboard-client.php" class="nav-icon" title="Minha Conta">
+                    <i class='bx bxs-user'></i>
+                </a>
+        
             <a href="?rota=produtos" class="btn btn-primary">Encomendar Agora!</a>
           </div>
           <div class="mobile-toggle">

@@ -38,7 +38,7 @@ class OrderController{
   
   private function notificarFuncionario($idPedido) {
       // Implementação da notificação (veremos abaixo)
-  } 
+  }  
   
   public function criarPedido($clienteId, $produtos, $observacoes, $total) {
       try { 

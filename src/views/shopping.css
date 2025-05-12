@@ -135,21 +135,26 @@ section {
 .nav-buttons {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 1rem;
+  margin-right: 2rem;
 }
 .nav-icon {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #ccc;
-  color: black;
+  color: #333;
   font-size: 1.5rem;
-  transition: all 0.3s ease;
+  margin-left: 1rem;
+  transition: color 0.3s ease;
+  text-decoration: none;
 }
+
+.nav-icon:hover {
+  color: #ff7f00;
+}
+
+.nav-icon i {
+  font-size: 24px;
+}
+
 nav {
   display: flex;
   justify-content: space-between;

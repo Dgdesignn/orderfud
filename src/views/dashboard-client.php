@@ -58,11 +58,12 @@ $pagina = isset($_GET['rota']) ? $_GET['rota'] : 'pedidos';
         </ul>
         <ul class="side-menu">
             <li>
-                <a href="logout.php" class="logout">
+                <a href="?rota=logout" class="logout">
                     <i class='bx bxs-log-out-circle'></i>
                     <span class="text">Sair</span>
                 </a>
             </li>
+
         </ul>
     </section>
     <!-- SIDEBAR -->
@@ -101,6 +102,9 @@ $pagina = isset($_GET['rota']) ? $_GET['rota'] : 'pedidos';
                     break;
                 case 'perfil':
                     include "./pages/client/perfil.php";
+                    break;
+                case 'logout':
+                    include "./pages/client/logutcliente.php";
                     break;
                 default:
                     include "./pages/client/pedidos.php";

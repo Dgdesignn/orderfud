@@ -15,6 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
 }
 
 try {
+    // Debug
+    error_log("Dados recebidos: " . print_r($_POST, true));
+
     // Verificar se todos os dados necessários foram enviados
     if (!isset($_POST['produtos']) || !isset($_POST['total'])) {
         throw new Exception("Dados do pedido incompletos");
@@ -32,32 +35,34 @@ try {
         throw new Exception("Lista de produtos inválida");
     }
 
+    // Validar estrutura dos produtos
+    foreach ($produtos as $produto) {
+        if (!isset($produto['idProduto']) || !isset($produto['quantidade'])) {
+            throw new Exception("Formato de produto inválido");
+        }
+    }
+ 
+    // Debug
+    error_log("Produtos formatados: " . print_r($produtos, true));
+
     // Criar o pedido
     $resultado = $orderController->criarPedido($clienteId, $produtos, $observacoes, $total);
-    echo"<pre>";
-    var_dump($produtos);
-    echo"<br/>";
-    echo"<br/>";
-    //var_dump($resultado);
-    echo"<br/>";
-    echo"<br/>";
-
 
     if ($resultado['success']) {
-        // Limpar carrinho e redirecionar para dashboard
         echo "
         <script>
             localStorage.removeItem('cartProducts');
             window.location.href = '../views/dashboard-client.php?success=true';
         </script>";
     } else {
-        $_SESSION['erro'] = $resultado['message'];
-        header("Location: ../views/checkout.php");
+        throw new Exception($resultado['message']);
     }
 
 } catch (Exception $e) {
+    error_log("Erro no processamento do pedido: " . $e->getMessage());
     $_SESSION['erro'] = "Erro ao processar pedido: " . $e->getMessage();
     header("Location: ../views/checkout.php");
+  
 }
 exit;
 ?> 
