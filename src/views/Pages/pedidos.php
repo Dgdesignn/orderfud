@@ -217,55 +217,84 @@ $pedidos = $pedidosController->buscarTodosPedidos();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const statusValidos = ['pendente', 'em_preparo', 'pronto', 'entregue', 'cancelado'];
+    let atualizacaoEmAndamento = false;
+
     // Atualizar status do pedido
     document.querySelectorAll('.status-select').forEach(select => {
-        select.addEventListener('change', function() {
+        select.addEventListener('change', async function() {
+            if (atualizacaoEmAndamento) {
+                mostrarNotificacao('Uma atualização já está em andamento', 'warning');
+                return;
+            }
+
             const pedidoId = this.getAttribute('data-pedido-id');
             const novoStatus = this.value;
+            const statusAnterior = this.getAttribute('data-status-anterior');
             const pedidoCard = this.closest('.pedido-card');
-            
-            // Adicionar indicador visual de carregamento
+
+            if (!statusValidos.includes(novoStatus)) {
+                mostrarNotificacao('Status inválido', 'error');
+                this.value = statusAnterior;
+                return;
+            }
+
+            atualizacaoEmAndamento = true;
             pedidoCard.style.opacity = '0.7';
-           
-            fetch('../../api/pedidos/atualizar-status.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    pedido_id: pedidoId,
-                    status: novoStatus
-                })
-            })
-            .then(response => {
-                console.log(response);
-                if (!response.ok) {
-                    throw new Error('Erro na resposta do servidor');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Atualizar visual do card
-                    pedidoCard.setAttribute('data-status', novoStatus);
-                    pedidoCard.style.opacity = '1';
+            this.disabled = true;
+
+            const maxTentativas = 3;
+            let tentativa = 0;
+
+            while (tentativa < maxTentativas) {
+                try {
+                    const response = await fetch('../../api/pedidos/atualizar-status.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            pedido_id: pedidoId,
+                            status: novoStatus
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+            if (data.success) {
+                        pedidoCard.setAttribute('data-status', novoStatus);
+                        atualizarClassesStatus(pedidoCard, novoStatus);
+                        this.setAttribute('data-status-anterior', novoStatus);
+                        mostrarNotificacao('Status atualizado com sucesso!', 'success');
+                        break;
+                    } else {
+                        throw new Error(data.message || 'Erro ao atualizar status');
+                    }
+                } catch (error) {
+                    console.error(`Tentativa ${tentativa + 1} falhou:`, error);
+                    tentativa++;
                     
-                    // Atualizar classes de status
-                    atualizarClassesStatus(pedidoCard, novoStatus);
-                    
-                    // Notificar sucesso
-                    mostrarNotificacao('Status atualizado com sucesso!', 'success');
-                } else {
-                    throw new Error(data.message || 'Erro ao atualizar status');
+                    if (tentativa === maxTentativas) {
+                        this.value = statusAnterior;
+                        mostrarNotificacao(`Erro ao atualizar status após ${maxTentativas} tentativas`, 'error');
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, 1000 * tentativa));
+                        continue;
+                    }
                 }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                // Reverter para o status anterior
-                this.value = this.getAttribute('data-status-anterior');
-                pedidoCard.style.opacity = '1';
-                mostrarNotificacao('Erro ao atualizar status: ' + error.message, 'error');
-            });
+            }
+
+            pedidoCard.style.opacity = '1';
+            this.disabled = false;
+            atualizacaoEmAndamento = false;
+            
+            // Salvar status atual para possível reversão
+            this.setAttribute('data-status-anterior', this.value);
+        });
+    });
             
             // Salvar status atual para possível reversão
             this.setAttribute('data-status-anterior', this.value);
