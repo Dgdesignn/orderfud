@@ -264,6 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     const data = await response.json();
+            console.log('Resposta da API:', data);
             if (data.success) {
                         pedidoCard.setAttribute('data-status', novoStatus);
                         atualizarClassesStatus(pedidoCard, novoStatus);
@@ -298,6 +299,20 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Salvar status atual para possível reversão
             this.setAttribute('data-status-anterior', this.value);
+        });
+    });
+
+    // Configurar filtro de status
+    document.getElementById('status-filter').addEventListener('change', function() {
+        const statusSelecionado = this.value;
+        const pedidos = document.querySelectorAll('.pedido-card');
+
+        pedidos.forEach(pedido => {
+            if (statusSelecionado === 'todos' || pedido.getAttribute('data-status') === statusSelecionado) {
+                pedido.style.display = 'block';
+            } else {
+                pedido.style.display = 'none';
+            }
         });
     });
 
