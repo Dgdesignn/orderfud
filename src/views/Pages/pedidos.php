@@ -142,9 +142,17 @@ $pedidos = $pedidosController->buscarTodosPedidos();
     }
 
     .status-select {
-        padding: 5px;
+        padding: 8px;
         border-radius: 4px;
         border: 1px solid #ddd;
+        background-color: white;
+        cursor: pointer;
+    }
+
+    .status-select:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
     }
 
     .pedido-observacoes {
@@ -152,6 +160,58 @@ $pedidos = $pedidosController->buscarTodosPedidos();
         padding-top: 15px;
         border-top: 1px solid #eee;
         font-size: 0.9rem;
+    }
+
+    /* Adicionar estilos para as notificações */
+    .notificacao {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 4px;
+        color: white;
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .notificacao.success {
+        background-color: #4CAF50;
+    }
+
+    .notificacao.error {
+        background-color: #f44336;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Estilos para diferentes status */
+    .pedido-card[data-status="pendente"] {
+        border-left: 4px solid #FACC15;
+    }
+
+    .pedido-card[data-status="em_preparo"] {
+        border-left: 4px solid #3B82F6;
+    }
+
+    .pedido-card[data-status="pronto"] {
+        border-left: 4px solid #22C55E;
+    }
+
+    .pedido-card[data-status="entregue"] {
+        border-left: 4px solid #16A34A;
+    }
+
+    .pedido-card[data-status="cancelado"] {
+        border-left: 4px solid #EF4444;
     }
 </style>
 
@@ -162,8 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
         select.addEventListener('change', function() {
             const pedidoId = this.getAttribute('data-pedido-id');
             const novoStatus = this.value;
+            const pedidoCard = this.closest('.pedido-card');
             
-            fetch('../controllers/atualizar_status_pedido.php', {
+            // Adicionar indicador visual de carregamento
+            pedidoCard.style.opacity = '0.7';
+           
+            fetch('../../api/pedidos/atualizar-status.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -173,23 +237,62 @@ document.addEventListener('DOMContentLoaded', function() {
                     status: novoStatus
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log(response);
+                if (!response.ok) {
+                    throw new Error('Erro na resposta do servidor');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    alert('Status atualizado com sucesso!');
-                    // Atualizar a cor ou classe do card conforme o novo status
-                    const pedidoCard = this.closest('.pedido-card');
+                    // Atualizar visual do card
                     pedidoCard.setAttribute('data-status', novoStatus);
+                    pedidoCard.style.opacity = '1';
+                    
+                    // Atualizar classes de status
+                    atualizarClassesStatus(pedidoCard, novoStatus);
+                    
+                    // Notificar sucesso
+                    mostrarNotificacao('Status atualizado com sucesso!', 'success');
                 } else {
-                    alert('Erro ao atualizar status: ' + data.message);
+                    throw new Error(data.message || 'Erro ao atualizar status');
                 }
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao atualizar status');
+                // Reverter para o status anterior
+                this.value = this.getAttribute('data-status-anterior');
+                pedidoCard.style.opacity = '1';
+                mostrarNotificacao('Erro ao atualizar status: ' + error.message, 'error');
             });
+            
+            // Salvar status atual para possível reversão
+            this.setAttribute('data-status-anterior', this.value);
         });
     });
+
+    // Função para atualizar classes de status
+    function atualizarClassesStatus(card, novoStatus) {
+        // Remover todas as classes de status existentes
+        card.classList.remove('status-pendente', 'status-em_preparo', 'status-pronto', 'status-entregue', 'status-cancelado');
+        // Adicionar nova classe de status
+        card.classList.add(`status-${novoStatus}`);
+    }
+
+    // Função para mostrar notificações
+    function mostrarNotificacao(mensagem, tipo) {
+        const notificacao = document.createElement('div');
+        notificacao.className = `notificacao ${tipo}`;
+        notificacao.textContent = mensagem;
+        
+        document.body.appendChild(notificacao);
+        
+        // Remover notificação após 3 segundos
+        setTimeout(() => {
+            notificacao.remove();
+        }, 3000);
+    }
 
     // Filtrar pedidos por status
     document.getElementById('status-filter').addEventListener('change', function() {

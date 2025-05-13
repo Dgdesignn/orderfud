@@ -62,7 +62,6 @@ try {
     error_log("Erro no processamento do pedido: " . $e->getMessage());
     $_SESSION['erro'] = "Erro ao processar pedido: " . $e->getMessage();
     header("Location: ../views/checkout.php");
-  
 }
 exit;
 ?> 

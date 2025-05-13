@@ -202,6 +202,74 @@ class OrderModel {
             return [];
         }
     }
+
+    public function getNewOrders() {
+        try {
+            $sql = "SELECT 
+                        p.idPedido,
+                        p.data_pedido,
+                        p.total,
+                        p.status,
+                        p.observacoes,
+                        c.nome as nome_cliente,
+                        GROUP_CONCAT(
+                            CONCAT(pp.quantidade, 'x ', pr.nome)
+                            SEPARATOR ', '
+                        ) as items
+                    FROM pedido p
+                    JOIN cliente c ON p.fk_Cliente_idCliente = c.idCliente
+                    JOIN pedido_produto pp ON p.idPedido = pp.fk_Pedido_idPedido
+                    JOIN produto pr ON pp.fk_Produto_idProduto = pr.idProduto
+                    WHERE p.notificado = 0
+                    GROUP BY p.idPedido
+                    ORDER BY p.data_pedido DESC";
+                    
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar novos pedidos: " . $e->getMessage());
+            throw new Exception("Erro ao buscar novos pedidos");
+        }
+    }
+
+    public function marcarPedidoComoNotificado($idPedido) {
+        try {
+            $sql = "UPDATE pedido SET notificado = 1 WHERE idPedido = :id";
+            $stmt = $this->connection->prepare($sql);
+            return $stmt->execute([':id' => $idPedido]);
+        } catch (PDOException $e) {
+            error_log("Erro ao marcar pedido como notificado: " . $e->getMessage());
+            throw new Exception("Erro ao atualizar notificação");
+        }
+    }
+
+    public function getStatusUpdates($clientId = null) {
+        $sql = "SELECT * FROM pedidos WHERE status_atualizado = 1";
+        if ($clientId) {
+            $sql .= " AND idCliente = ?";
+        }
+        
+        $stmt = $this->connection->prepare($sql);
+        if ($clientId) {
+            $stmt->execute([$clientId]);
+        } else {
+            $stmt->execute();
+        }
+        
+        // Resetar flag de atualização
+        $this->resetStatusUpdateFlag($stmt->fetchAll(PDO::FETCH_ASSOC));
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function resetStatusUpdateFlag($orders) {
+        if (empty($orders)) return;
+        
+        $ids = array_column($orders, 'idPedido');
+        $sql = "UPDATE pedidos SET status_atualizado = 0 WHERE idPedido IN (" . implode(',', $ids) . ")";
+        $this->connection->exec($sql);
+    }
 }
 ?>
    

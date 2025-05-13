@@ -189,6 +189,50 @@ class OrderController{
           return [];
       }
   }
+
+  public function checkForUpdates($userType, $userId) {
+      $updates = [];
+      
+      // Verificar novos pedidos
+      $newOrders = $this->model->getNewOrders();
+      foreach ($newOrders as $order) {
+          $updates[] = [
+              'type' => 'NEW_ORDER',
+              'order' => [
+                  'id' => $order['idPedido'],
+                  'clientName' => $order['nomeCliente'],
+                  'total' => $order['total'],
+                  'status' => $order['status']
+              ]
+          ];
+      }
+      
+      // Verificar atualizações de status
+      $statusUpdates = $this->model->getStatusUpdates($userType === 'client' ? $userId : null);
+      foreach ($statusUpdates as $update) {
+          $updates[] = [
+              'type' => 'STATUS_UPDATE',
+              'order' => [
+                  'id' => $update['idPedido'],
+                  'status' => $update['status']
+              ]
+          ];
+      }
+      
+      return $updates;
+  }
+
+  public function updateOrderStatus($orderId, $status) {
+      return $this->model->updateStatus($orderId, $status);
+  }
+
+  public function checkNewOrders() {
+      if ($_GET['action'] === 'checkNewOrders') {
+          $newOrders = $this->model->getNewOrders();
+          echo json_encode(['newOrders' => $newOrders]);
+          exit;
+      }
+  }
 }
     
 ?>

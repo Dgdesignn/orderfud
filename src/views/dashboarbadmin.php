@@ -5,16 +5,12 @@
   require "../controllers/clientController.php";
   require "../controllers/categoryController.php";
   require "../controllers/orderController.php";
-
-
-  
   
   $funcionario = new EmployeeController();
   $clientes = new ClientController();
   $produto = new ProductController();
   $category = new CategoryController();
   $pedido = new OrderController();
-
 
   session_start();
   if(!isset($_SESSION["user"])){
@@ -24,7 +20,6 @@
   $total_produtos = $produto->totalProdutos();
   $total_clientes = $clientes->totalClientes();
   $total_pedidos= $pedido->totalPedidos();
-
 
 ?>
 
@@ -44,16 +39,9 @@
 	 <link rel="stylesheet" href="asset/css/productstyle.css?=123">
 	 <link rel="stylesheet" href="asset/css/funcionario.css?=123">
 
-
 	<title>OrderFud</title>
-
-
-
-
-
 </head>
 <body>
-
 
 <!-- SIDEBAR -->
 	<?php include "./pages/sideBar.php"?>
@@ -63,19 +51,16 @@
 <section id="content">
 	<!-- NAVBAR -->
 	<?php include "./pages/navBar.php"?>
-
 	<!-- NAVBAR -->
 
 	<!-- MAIN -->
 	<main>
 		<?php 
-			
 			$rota = $_GET["rota"];
 			switch($rota){
 				case "home":
 				case "/":
 					$_SESSION['user']['tipo']=='Funcionária'?include "./pages/pedidos.php":include "./pages/home.php";
-					
 					break;
 				case "funcionario":
 					include "./pages/funcionario.php";
@@ -97,8 +82,6 @@
 					break;
 				default :
 					$_SESSION['user']['tipo']=='Funcionária'?include "./pages/pedidos.php":include "./pages/home.php";
-
-
 			}
 		?>
 	</main>
@@ -106,12 +89,6 @@
 </section>
 <!-- CONTENT -->
 
-
-
-
-
-	
-
-	<script src="./asset/js/main.js"></script>
+<script src="./asset/js/main.js"></script>
 </body>
 </html>
