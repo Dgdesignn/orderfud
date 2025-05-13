@@ -217,13 +217,24 @@ $pedidos = $pedidosController->buscarTodosPedidos();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Função para atualizar status do pedido
+    let atualizacaoEmAndamento = false;
+    
     async function atualizarStatusPedido(select) {
+        if (atualizacaoEmAndamento) {
+            mostrarNotificacao('Uma atualização já está em andamento', 'warning');
+            return;
+        }
+
         const pedidoId = select.getAttribute('data-pedido-id');
         const novoStatus = select.value;
+        const statusAnterior = select.getAttribute('data-status-anterior');
         const pedidoCard = select.closest('.pedido-card');
-        
+
         try {
+            atualizacaoEmAndamento = true;
+            pedidoCard.style.opacity = '0.7';
+            select.disabled = true;
+
             const response = await fetch('../../api/pedidos/atualizar-status.php', {
                 method: 'POST',
                 headers: {
@@ -236,21 +247,26 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const data = await response.json();
-            
+            console.log('Resposta da API:', data);
+
             if (data.success) {
                 pedidoCard.setAttribute('data-status', novoStatus);
+                select.setAttribute('data-status-anterior', novoStatus);
                 mostrarNotificacao('Status atualizado com sucesso!', 'success');
             } else {
-                throw new Error(data.message);
+                throw new Error(data.message || 'Erro ao atualizar status');
             }
         } catch (error) {
+            console.error('Erro:', error);
+            select.value = statusAnterior;
             mostrarNotificacao(error.message, 'error');
-            // Reverter para o status anterior
-            select.value = select.getAttribute('data-status-anterior');
+        } finally {
+            pedidoCard.style.opacity = '1';
+            select.disabled = false;
+            atualizacaoEmAndamento = false;
         }
     }
 
-    // Função para mostrar notificações
     function mostrarNotificacao(mensagem, tipo) {
         const notificacao = document.createElement('div');
         notificacao.className = `notificacao ${tipo}`;
@@ -259,20 +275,14 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => notificacao.remove(), 3000);
     }
 
-    // Adicionar listeners aos selects de status
+    // Adicionar listener aos selects de status (apenas uma vez)
     document.querySelectorAll('.status-select').forEach(select => {
-        // Guardar status inicial
         select.setAttribute('data-status-anterior', select.value);
         
         select.addEventListener('change', function() {
             atualizarStatusPedido(this);
-            // Atualizar status anterior após mudança
-            this.setAttribute('data-status-anterior', this.value);
         });
     });
-
-    // Atualizar status do pedido
-    document.querySelectorAll('.status-select').forEach(select => {
         select.addEventListener('change', async function() {
             if (atualizacaoEmAndamento) {
                 mostrarNotificacao('Uma atualização já está em andamento', 'warning');
