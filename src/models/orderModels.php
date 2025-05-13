@@ -99,34 +99,22 @@ class OrderModel {
 
     public function atualizarStatusPedido($pedidoId, $novoStatus) {
         try {
-            // Validar status permitidos
             $statusPermitidos = ['pendente', 'em_preparo', 'pronto', 'entregue', 'cancelado'];
+            
             if (!in_array($novoStatus, $statusPermitidos)) {
-                return [
-                    'success' => false,
-                    'message' => 'Status inválido'
-                ];
+                throw new Exception("Status inválido");
             }
 
-            // Atualizar status
             $sql = "UPDATE pedido SET status = :status WHERE idPedido = :pedido_id";
             $stmt = $this->connection->prepare($sql);
-            $resultado = $stmt->execute([
+            
+            return $stmt->execute([
                 ':status' => $novoStatus,
                 ':pedido_id' => $pedidoId
             ]);
-
-            return [
-                'success' => $resultado,
-                'message' => $resultado ? 'Status atualizado com sucesso' : 'Erro ao atualizar status'
-            ];
-
         } catch (Exception $e) {
             error_log("Erro ao atualizar status: " . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Erro ao atualizar status'
-            ];
+            return false;
         }
     }
 
@@ -284,3 +272,4 @@ class OrderModel {
     }
 }
 ?>
+   
