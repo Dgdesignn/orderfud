@@ -217,8 +217,59 @@ $pedidos = $pedidosController->buscarTodosPedidos();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const statusValidos = ['pendente', 'em_preparo', 'pronto', 'entregue', 'cancelado'];
-    let atualizacaoEmAndamento = false;
+    // Função para atualizar status do pedido
+    async function atualizarStatusPedido(select) {
+        const pedidoId = select.getAttribute('data-pedido-id');
+        const novoStatus = select.value;
+        const pedidoCard = select.closest('.pedido-card');
+        
+        try {
+            const response = await fetch('../../api/pedidos/atualizar-status.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    pedido_id: pedidoId,
+                    status: novoStatus
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                pedidoCard.setAttribute('data-status', novoStatus);
+                mostrarNotificacao('Status atualizado com sucesso!', 'success');
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            mostrarNotificacao(error.message, 'error');
+            // Reverter para o status anterior
+            select.value = select.getAttribute('data-status-anterior');
+        }
+    }
+
+    // Função para mostrar notificações
+    function mostrarNotificacao(mensagem, tipo) {
+        const notificacao = document.createElement('div');
+        notificacao.className = `notificacao ${tipo}`;
+        notificacao.textContent = mensagem;
+        document.body.appendChild(notificacao);
+        setTimeout(() => notificacao.remove(), 3000);
+    }
+
+    // Adicionar listeners aos selects de status
+    document.querySelectorAll('.status-select').forEach(select => {
+        // Guardar status inicial
+        select.setAttribute('data-status-anterior', select.value);
+        
+        select.addEventListener('change', function() {
+            atualizarStatusPedido(this);
+            // Atualizar status anterior após mudança
+            this.setAttribute('data-status-anterior', this.value);
+        });
+    });
 
     // Atualizar status do pedido
     document.querySelectorAll('.status-select').forEach(select => {

@@ -1,24 +1,30 @@
+
 <?php
 require_once "../../controllers/orderController.php";
 
 header('Content-Type: application/json');
 
 try {
-    // Pegar dados do POST
+    // Validar dados recebidos
     $dados = json_decode(file_get_contents('php://input'), true);
-   // echo json_encode($dados);
-   
+    
     if (!isset($dados['pedido_id']) || !isset($dados['status'])) {
-        throw new Exception('Dados incompletos');
+        throw new Exception('Dados incompletos: pedido_id e status são obrigatórios');
+    }
+
+    // Validar pedido_id
+    if (!is_numeric($dados['pedido_id'])) {
+        throw new Exception('ID do pedido inválido');
     }
     
     $orderController = new OrderController();
     $resultado = $orderController->atualizarStatusPedido($dados['pedido_id'], $dados['status']);
     
     if ($resultado['success']) {
+        http_response_code(200);
         echo json_encode([
             'success' => true,
-            'message' => 'Status atualizado com sucesso'
+            'message' => $resultado['message']
         ]);
     } else {
         throw new Exception($resultado['message']);
@@ -30,4 +36,4 @@ try {
         'success' => false,
         'message' => $e->getMessage()
     ]);
-} 
+}
