@@ -1,5 +1,5 @@
-<?php
 
+<?php
 $pedidosController = new OrderController();
 $pedidos = $pedidosController->buscarTodosPedidos();
 ?>
@@ -23,10 +23,10 @@ $pedidos = $pedidosController->buscarTodosPedidos();
         </div>
     </div>
 
-    <div class="pedidos-grid">
+    <div class="pedidos-grid" id="pedidos-grid">
         <?php if (!empty($pedidos)): ?>
             <?php foreach ($pedidos as $pedido): ?>
-                <div class="pedido-card" data-status="<?= $pedido['status'] ?>">
+                <div class="pedido-card" data-pedido-id="<?= $pedido['idPedido'] ?>" data-status="<?= $pedido['status'] ?>">
                     <div class="pedido-header">
                         <h3>Pedido #<?= $pedido['idPedido'] ?></h3>
                         <span class="pedido-data"><?= date('d/m/Y H:i', strtotime($pedido['data_pedido'])) ?></span>
@@ -41,7 +41,7 @@ $pedidos = $pedidosController->buscarTodosPedidos();
                         <?php 
                         $items = explode(', ', $pedido['items']);
                         foreach ($items as $item): ?>
-                            <div class="item"><?= $item ?></div>
+                            <div class="item"><?= htmlspecialchars($item) ?></div>
                         <?php endforeach; ?>
                     </div>
 
@@ -52,7 +52,7 @@ $pedidos = $pedidosController->buscarTodosPedidos();
                         
                         <div class="pedido-status">
                             <strong>Status:</strong>
-                            <select class="status-select" data-pedido-id="<?= $pedido['idPedido'] ?>">
+                            <select class="status-select" data-pedido-id="<?= $pedido['idPedido'] ?>" data-status-atual="<?= $pedido['status'] ?>">
                                 <option value="pendente" <?= $pedido['status'] == 'pendente' ? 'selected' : '' ?>>Pendente</option>
                                 <option value="em_preparo" <?= $pedido['status'] == 'em_preparo' ? 'selected' : '' ?>>Em Preparo</option>
                                 <option value="pronto" <?= $pedido['status'] == 'pronto' ? 'selected' : '' ?>>Pronto</option>
@@ -70,7 +70,7 @@ $pedidos = $pedidosController->buscarTodosPedidos();
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
-        <?php else: ?> 
+        <?php else: ?>
             <div class="no-pedidos">
                 <p>Nenhum pedido encontrado.</p>
             </div>
@@ -111,6 +111,12 @@ $pedidos = $pedidosController->buscarTodosPedidos();
         border-radius: 8px;
         padding: 15px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: opacity 0.3s ease;
+    }
+
+    .pedido-card.loading {
+        opacity: 0.7;
+        pointer-events: none;
     }
 
     .pedido-header {
@@ -162,7 +168,6 @@ $pedidos = $pedidosController->buscarTodosPedidos();
         font-size: 0.9rem;
     }
 
-    /* Adicionar estilos para as notificações */
     .notificacao {
         position: fixed;
         top: 20px;
@@ -182,6 +187,10 @@ $pedidos = $pedidosController->buscarTodosPedidos();
         background-color: #f44336;
     }
 
+    .notificacao.warning {
+        background-color: #ff9800;
+    }
+
     @keyframes slideIn {
         from {
             transform: translateX(100%);
@@ -193,7 +202,6 @@ $pedidos = $pedidosController->buscarTodosPedidos();
         }
     }
 
-    /* Estilos para diferentes status */
     .pedido-card[data-status="pendente"] {
         border-left: 4px solid #FACC15;
     }
@@ -217,17 +225,30 @@ $pedidos = $pedidosController->buscarTodosPedidos();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Atualizar status do pedido
-    document.querySelectorAll('.status-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const pedidoId = this.getAttribute('data-pedido-id');
-            const novoStatus = this.value;
-            const pedidoCard = this.closest('.pedido-card');
-            
-            // Adicionar indicador visual de carregamento
-            pedidoCard.style.opacity = '0.7';
-           
-            fetch('../../api/pedidos/atualizar-status.php', {
+    const pedidosGrid = document.getElementById('pedidos-grid');
+    let atualizacaoEmAndamento = false;
+
+    async function atualizarStatusPedido(select) {
+        if (atualizacaoEmAndamento) {
+            mostrarNotificacao('Uma atualização já está em andamento', 'warning');
+            return;
+        }
+
+        const pedidoCard = select.closest('.pedido-card');
+        const pedidoId = select.dataset.pedidoId;
+        const novoStatus = select.value;
+        const statusAtual = select.dataset.statusAtual;
+
+        if (novoStatus === statusAtual) {
+            return;
+        }
+
+        try {
+            atualizacaoEmAndamento = true;
+            pedidoCard.classList.add('loading');
+            select.disabled = true;
+
+            const response = await fetch('../../api/pedidos/atualizar-status.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -236,51 +257,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     pedido_id: pedidoId,
                     status: novoStatus
                 })
-            })
-            .then(response => {
-                console.log(response);
-                if (!response.ok) {
-                    throw new Error('Erro na resposta do servidor');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // Atualizar visual do card
-                    pedidoCard.setAttribute('data-status', novoStatus);
-                    pedidoCard.style.opacity = '1';
-                    
-                    // Atualizar classes de status
-                    atualizarClassesStatus(pedidoCard, novoStatus);
-                    
-                    // Notificar sucesso
-                    mostrarNotificacao('Status atualizado com sucesso!', 'success');
-                } else {
-                    throw new Error(data.message || 'Erro ao atualizar status');
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                // Reverter para o status anterior
-                this.value = this.getAttribute('data-status-anterior');
-                pedidoCard.style.opacity = '1';
-                mostrarNotificacao('Erro ao atualizar status: ' + error.message, 'error');
             });
-            
-            // Salvar status atual para possível reversão
-            this.setAttribute('data-status-anterior', this.value);
-        });
-    });
 
-    // Função para atualizar classes de status
-    function atualizarClassesStatus(card, novoStatus) {
-        // Remover todas as classes de status existentes
-        card.classList.remove('status-pendente', 'status-em_preparo', 'status-pronto', 'status-entregue', 'status-cancelado');
-        // Adicionar nova classe de status
-        card.classList.add(`status-${novoStatus}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao atualizar status');
+            }
+
+            if (data.success) {
+                pedidoCard.setAttribute('data-status', novoStatus);
+                select.dataset.statusAtual = novoStatus;
+                mostrarNotificacao('Status atualizado com sucesso!', 'success');
+            } else {
+                throw new Error(data.message || 'Erro ao atualizar status');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            select.value = statusAtual;
+            mostrarNotificacao(error.message, 'error');
+        } finally {
+            pedidoCard.classList.remove('loading');
+            select.disabled = false;
+            atualizacaoEmAndamento = false;
+        }
     }
 
-    // Função para mostrar notificações
     function mostrarNotificacao(mensagem, tipo) {
         const notificacao = document.createElement('div');
         notificacao.className = `notificacao ${tipo}`;
@@ -288,13 +290,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         document.body.appendChild(notificacao);
         
-        // Remover notificação após 3 segundos
         setTimeout(() => {
             notificacao.remove();
         }, 3000);
     }
 
-    // Filtrar pedidos por status
+    // Event Listeners
+    pedidosGrid.addEventListener('change', function(event) {
+        if (event.target.classList.contains('status-select')) {
+            atualizarStatusPedido(event.target);
+        }
+    });
+
+    // Filtro de status
     document.getElementById('status-filter').addEventListener('change', function() {
         const statusSelecionado = this.value;
         const pedidos = document.querySelectorAll('.pedido-card');
