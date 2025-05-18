@@ -96,22 +96,24 @@ class OrderController{
           $statusPermitidos = ['pendente', 'em_preparo', 'pronto', 'entregue', 'cancelado'];
           if (!in_array($novoStatus, $statusPermitidos)) {
               throw new Exception("Status inválido");
-          }
+          } 
 
           // Atualizar no modelo
           $resultado = $this->model->atualizarStatusPedido($pedidoId, $novoStatus);
           
-          if (!$resultado['success']) {
+          /*if (!$resultado['success']) {
               throw new Exception($resultado['message']);
           }
 
           return [
               'success' => true,
               'message' => 'Status atualizado com sucesso'
-          ];
+          ];*/
 
       } catch (Exception $e) {
+    
           error_log("Erro ao atualizar status: " . $e->getMessage());
+       
           return [
               'success' => false,
               'message' => $e->getMessage()

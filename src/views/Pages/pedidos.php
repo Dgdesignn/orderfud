@@ -4,10 +4,16 @@ $pedidos = $pedidosController->buscarTodosPedidos();
 
 // Processar alteração de status
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pedido_id']) && isset($_POST['novo_status'])) {
-    $resultado = $pedidosController->atualizarStatusPedido(
+
+ 
+$resultado = $pedidosController->atualizarStatusPedido(
         intval($_POST['pedido_id']), 
         $_POST['novo_status']
     );
+
+    //var_dump($resultado);
+
+       /* 
 
     if ($resultado['success']) {
         $_SESSION['mensagem'] = 'Status atualizado com sucesso!';
@@ -16,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pedido_id']) && isset
     }
 
     header('Location: ' . $_SERVER['PHP_SELF'] . '?rota=pedidos');
-    exit;
+    exit;*/
 }
 ?>
 
@@ -112,6 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pedido_id']) && isset
             </div>
         <?php endif; ?>
     </div>
+
+
 </div>
 
 <style>

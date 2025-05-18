@@ -105,17 +105,21 @@ class OrderModel {
             $sqlVerificar = "SELECT status FROM pedido WHERE idPedido = :pedido_id FOR UPDATE";
             $stmtVerificar = $this->connection->prepare($sqlVerificar);
             $stmtVerificar->execute([':pedido_id' => $pedidoId]);
-            
-            $pedido = $stmtVerificar->fetch(PDO::FETCH_ASSOC);
+             $pedido = $stmtVerificar->fetch(PDO::FETCH_ASSOC);
+
+             echo"model <br/>";
+
+           
+         
             if (!$pedido) {
                 throw new Exception('Pedido não encontrado');
             }
 
             // Validar transição de status
-            $statusValido = $this->validarTransicaoStatus($pedido['status'], $novoStatus);
+            /*$statusValido = $this->validarTransicaoStatus($pedido['status'], $novoStatus);
             if (!$statusValido) {
                 throw new Exception('Transição de status não permitida');
-            }
+            }*/
 
             // Atualizar status
             $sql = "UPDATE pedido SET 
@@ -128,7 +132,7 @@ class OrderModel {
                 ':status' => $novoStatus,
                 ':pedido_id' => $pedidoId
             ]);
-
+            
             if (!$resultado) {
                 throw new Exception("Erro ao atualizar status");
             }
@@ -309,10 +313,9 @@ class OrderModel {
         $sql = "UPDATE pedidos SET status_atualizado = 0 WHERE idPedido IN (" . implode(',', $ids) . ")";
         $this->connection->exec($sql);
     }
-}
-?>
-   
 
+
+    
     private function validarTransicaoStatus($statusAtual, $novoStatus) {
         $transicoesPermitidas = [
             'pendente' => ['em_preparo', 'cancelado'],
@@ -322,6 +325,10 @@ class OrderModel {
             'cancelado' => []
         ];
 
-        return isset($transicoesPermitidas[$statusAtual]) && 
-               in_array($novoStatus, $transicoesPermitidas[$statusAtual]);
+        //return isset($transicoesPermitidas[$statusAtual]) && 
+          //     in_array($novoStatus, $transicoesPermitidas[$statusAtual]);
     }
+}
+?>
+   
+
