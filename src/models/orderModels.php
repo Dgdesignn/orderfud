@@ -134,29 +134,24 @@ class OrderModel {
             ]);
             
             if (!$resultado) {
-                throw new Exception("Erro ao atualizar status");
-            }
-
-            $this->connection->commit();
-            return [
-                'success' => true,
-                'message' => 'Status atualizado com sucesso'
-            ];
-
-            if (!$resultado) {
                 throw new Exception("Erro ao atualizar status no banco de dados");
             }
 
+            $this->connection->commit();
+            
             return [
                 'success' => true,
                 'message' => 'Status atualizado com sucesso'
             ];
 
         } catch (Exception $e) {
+            if ($this->connection->inTransaction()) {
+                $this->connection->rollBack();
+            }
             error_log("Erro no modelo ao atualizar status: " . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Erro ao atualizar status do pedido'
+                'message' => $e->getMessage()
             ];
         }
     }
