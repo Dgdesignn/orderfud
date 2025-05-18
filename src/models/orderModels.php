@@ -99,59 +99,28 @@ class OrderModel {
 
     public function atualizarStatusPedido($pedidoId, $novoStatus) {
         try {
-            $this->connection->beginTransaction();
+                $sql = "UPDATE `pedido` SET `status`='$novoStatus' WHERE $pedidoId";
+                $stm = $this->connection->prepare($sql);
+                $stm->execute();
+                
+                //echo $stm->rowCount() . " records UPDATED successfully";
+                if($stm->rowCount()){
+                    return [
+                        'success' =>true,
+                        'message' =>''
+                    ];
+                }
 
-            // Verificar se o pedido existe e pegar status atual
-            $sqlVerificar = "SELECT status FROM pedido WHERE idPedido = :pedido_id FOR UPDATE";
-            $stmtVerificar = $this->connection->prepare($sqlVerificar);
-            $stmtVerificar->execute([':pedido_id' => $pedidoId]);
-             $pedido = $stmtVerificar->fetch(PDO::FETCH_ASSOC);
-
-             echo"model <br/>";
-
-           
-         
-            if (!$pedido) {
-                throw new Exception('Pedido não encontrado');
-            }
-
-            // Validar transição de status
-            /*$statusValido = $this->validarTransicaoStatus($pedido['status'], $novoStatus);
-            if (!$statusValido) {
-                throw new Exception('Transição de status não permitida');
-            }*/
-
-            // Atualizar status
-            $sql = "UPDATE pedido SET 
-                    status = :status,
-                    data_atualizacao = CURRENT_TIMESTAMP
-                    WHERE idPedido = :pedido_id";
-                    
-            $stmt = $this->connection->prepare($sql);
-            $resultado = $stmt->execute([
-                ':status' => $novoStatus,
-                ':pedido_id' => $pedidoId
-            ]);
-            
-            if (!$resultado) {
-                throw new Exception("Erro ao atualizar status no banco de dados");
-            }
-
-            $this->connection->commit();
-            
-            return [
-                'success' => true,
-                'message' => 'Status atualizado com sucesso'
-            ];
+               
 
         } catch (Exception $e) {
-            if ($this->connection->inTransaction()) {
-                $this->connection->rollBack();
-            }
-            error_log("Erro no modelo ao atualizar status: " . $e->getMessage());
+            // Rollback em caso de erro
+          
+            // Log mais detalhado
+            error_log("Erro ao atualizar status do pedido ID $pedidoId: " . $e->getMessage() . " | SQL: $sql");
             return [
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => 'Erro ao atualizar status: ' . $e->getMessage()
             ];
         }
     }

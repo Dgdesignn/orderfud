@@ -100,15 +100,13 @@ class OrderController{
 
           // Atualizar no modelo
           $resultado = $this->model->atualizarStatusPedido($pedidoId, $novoStatus);
-          
-          /*if (!$resultado['success']) {
-              throw new Exception($resultado['message']);
-          }
+         // var_dump($resultado);
+        
 
           return [
               'success' => true,
               'message' => 'Status atualizado com sucesso'
-          ];*/
+          ];
 
       } catch (Exception $e) {
     

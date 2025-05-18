@@ -13,16 +13,16 @@ $resultado = $pedidosController->atualizarStatusPedido(
 
     //var_dump($resultado);
 
-       /* 
+       
 
     if ($resultado['success']) {
         $_SESSION['mensagem'] = 'Status atualizado com sucesso!';
+        echo "<script>window.location.href = '?rota=pedidos'</script>";
     } else {
         $_SESSION['erro'] = $resultado['message'] ?? 'Erro ao atualizar status';
     }
 
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?rota=pedidos');
-    exit;*/
+  
 }
 ?>
 
