@@ -226,15 +226,18 @@ $pedidos = $pedidosController->buscarTodosPedidos();
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Função para atualizar status do pedido
-    function atualizarStatusPedido(select) {
+    async function atualizarStatusPedido(select) {
         const pedidoId = select.getAttribute('data-pedido-id');
         const novoStatus = select.value;
         const pedidoCard = select.closest('.pedido-card');
+        const statusAnterior = select.getAttribute('data-status-atual');
 
-        // Desabilitar select durante a atualização
+        // Feedback visual
+        pedidoCard.style.opacity = '0.7';
         select.disabled = true;
 
-        fetch('../dashboardadmin.php?rota=pedidos', {  // URL atualizada
+        try {
+            const response = await fetch('../../api/pedidos/atualizar-status.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -243,29 +246,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 pedido_id: pedidoId,
                 status: novoStatus
             })
-        })
-        .then(response => response.json())
-        .then(data => {
+        });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Erro ao atualizar status');
+            }
+
             if (data.success) {
                 // Atualizar o card com o novo status
                 pedidoCard.setAttribute('data-status', novoStatus);
-                alert('Status atualizado com sucesso!');
+                select.setAttribute('data-status-atual', novoStatus);
+                mostrarNotificacao('Status atualizado com sucesso!', 'success');
             } else {
-                // Reverter para o status anterior em caso de erro
-                select.value = select.getAttribute('data-status-atual');
-                alert('Erro ao atualizar status: ' + data.message);
+                throw new Error(data.message || 'Erro ao atualizar status');
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Erro:', error);
-            // Reverter para o status anterior em caso de erro
-            select.value = select.getAttribute('data-status-atual');
-            alert('Erro ao atualizar status');
-        })
-        .finally(() => {
-            // Reabilitar select após a atualização
+            select.value = statusAnterior;
+            mostrarNotificacao(error.message, 'error');
+        } finally {
+            pedidoCard.style.opacity = '1';
             select.disabled = false;
-        });
+        }
     }
 
     // Adicionar listeners aos selects de status

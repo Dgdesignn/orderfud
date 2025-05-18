@@ -99,16 +99,22 @@ class OrderModel {
 
     public function atualizarStatusPedido($pedidoId, $novoStatus) {
         try {
-            // Verificar se o pedido existe
-            $sqlVerificar = "SELECT status FROM pedido WHERE idPedido = :pedido_id";
+            $this->connection->beginTransaction();
+
+            // Verificar se o pedido existe e pegar status atual
+            $sqlVerificar = "SELECT status FROM pedido WHERE idPedido = :pedido_id FOR UPDATE";
             $stmtVerificar = $this->connection->prepare($sqlVerificar);
             $stmtVerificar->execute([':pedido_id' => $pedidoId]);
             
-            if (!$stmtVerificar->fetch()) {
-                return [
-                    'success' => false,
-                    'message' => 'Pedido não encontrado'
-                ];
+            $pedido = $stmtVerificar->fetch(PDO::FETCH_ASSOC);
+            if (!$pedido) {
+                throw new Exception('Pedido não encontrado');
+            }
+
+            // Validar transição de status
+            $statusValido = $this->validarTransicaoStatus($pedido['status'], $novoStatus);
+            if (!$statusValido) {
+                throw new Exception('Transição de status não permitida');
             }
 
             // Atualizar status
@@ -118,11 +124,20 @@ class OrderModel {
                     WHERE idPedido = :pedido_id";
                     
             $stmt = $this->connection->prepare($sql);
-            
-            return $stmt->execute([
+            $resultado = $stmt->execute([
                 ':status' => $novoStatus,
                 ':pedido_id' => $pedidoId
             ]);
+
+            if (!$resultado) {
+                throw new Exception("Erro ao atualizar status");
+            }
+
+            $this->connection->commit();
+            return [
+                'success' => true,
+                'message' => 'Status atualizado com sucesso'
+            ];
 
             if (!$resultado) {
                 throw new Exception("Erro ao atualizar status no banco de dados");
@@ -297,3 +312,16 @@ class OrderModel {
 }
 ?>
    
+
+    private function validarTransicaoStatus($statusAtual, $novoStatus) {
+        $transicoesPermitidas = [
+            'pendente' => ['em_preparo', 'cancelado'],
+            'em_preparo' => ['pronto', 'cancelado'],
+            'pronto' => ['entregue', 'cancelado'],
+            'entregue' => [],
+            'cancelado' => []
+        ];
+
+        return isset($transicoesPermitidas[$statusAtual]) && 
+               in_array($novoStatus, $transicoesPermitidas[$statusAtual]);
+    }
