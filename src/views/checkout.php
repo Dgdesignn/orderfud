@@ -60,12 +60,13 @@ $orderController = new OrderController();
                     <div class="summary-row">
                         <span>Forma de pagamento</span>
                         <div class="shipping-select">
-                            <select id="shipping-method">
-                                <option value="0">Selecionar</option>
-                                <option value="0">Cash</option>
-                                <option value="0">Carteira</option>
-                            </select>
-                        </div>
+                        <select id="shipping-method" onchange="handlePaymentMethod(this.value)">
+                            <option value="">Selecionar</option>
+                            <option value="cash">Cash</option>
+                            <option value="carteira">Carteira</option>
+                        </select>
+                        <div id="payment-info" class="payment-info"></div>
+                    </div>
                     </div>
                     
                  
@@ -95,6 +96,66 @@ $orderController = new OrderController();
     </div>
 
     <script>
+        let userWalletBalance = 1000; // Substitua pelo valor real da carteira do usuário
+
+        function handlePaymentMethod(method) {
+            const paymentInfo = document.getElementById('payment-info');
+            const total = parseFloat(document.getElementById('total-input').value);
+
+            if (method === 'cash') {
+                paymentInfo.innerHTML = '<p class="payment-message">O pagamento deve ser feito no momento da entrega.</p>';
+            } else if (method === 'carteira') {
+                if (userWalletBalance < total) {
+                    showInsufficientFundsModal();
+                } else {
+                    paymentInfo.innerHTML = `<p class="payment-message">Saldo disponível: ${formatCurrency(userWalletBalance)}</p>`;
+                }
+            } else {
+                paymentInfo.innerHTML = '';
+            }
+        }
+
+        function showInsufficientFundsModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Saldo Insuficiente</h3>
+                    <p>Você não possui saldo suficiente para realizar esta compra.</p>
+                    <button onclick="closeModal(this)">Fechar</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeModal(button) {
+            button.closest('.modal').remove();
+            document.getElementById('shipping-method').value = '';
+        }
+
+        function updateItemQuantity(productId, change) {
+            const cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
+            const product = cartProducts.find(p => p.id === productId);
+            
+            if (product) {
+                product.quantity = Math.max(1, product.quantity + change);
+                localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+                updateOrderSummary(cartProducts);
+            }
+        }
+
+        function removeItem(productId) {
+            let cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
+            cartProducts = cartProducts.filter(p => p.id !== productId);
+            localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+            
+            if (cartProducts.length === 0) {
+                window.location.href = 'shopping.php';
+            } else {
+                updateOrderSummary(cartProducts);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
             
@@ -143,10 +204,13 @@ $orderController = new OrderController();
                             </div>
                         </div>
                         <div class="quantity-controls">
-                            <button class="quantity-btn">-</button>
+                            <button class="quantity-btn" onclick="updateItemQuantity(${product.idProduto}, -1)">-</button>
                             <input type="number" value="${product.quantidade}" readonly>
-                            <button class="quantity-btn">+</button>
+                            <button class="quantity-btn" onclick="updateItemQuantity(${product.idProduto}, 1)">+</button>
                         </div>
+                        <button class="remove-btn" onclick="removeItem(${product.idProduto})">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
                         <div class="price">${formatCurrency(product.preco)}</div>
                         <div class="total">${formatCurrency(itemTotal)}</div>
                     </div>
