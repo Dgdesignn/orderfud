@@ -49,7 +49,7 @@ $pedidos = $pedidosController->buscarTodosPedidos();
                         <div class="pedido-total">
                             <strong>Total:</strong> <?= number_format($pedido['total'], 2, ',', '.') ?> Kz
                         </div>
-                        
+
                         <div class="pedido-status">
                             <strong>Status:</strong>
                             <select class="status-select" data-pedido-id="<?= $pedido['idPedido'] ?>" data-status-atual="<?= $pedido['status'] ?>">
@@ -225,84 +225,62 @@ $pedidos = $pedidosController->buscarTodosPedidos();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const pedidosGrid = document.getElementById('pedidos-grid');
-    let atualizacaoEmAndamento = false;
-
-    async function atualizarStatusPedido(select) {
-        if (atualizacaoEmAndamento) {
-            mostrarNotificacao('Uma atualização já está em andamento', 'warning');
-            return;
-        }
-
-        const pedidoCard = select.closest('.pedido-card');
-        const pedidoId = select.dataset.pedidoId;
+    // Função para atualizar status do pedido
+    function atualizarStatusPedido(select) {
+        const pedidoId = select.getAttribute('data-pedido-id');
         const novoStatus = select.value;
-        const statusAtual = select.dataset.statusAtual;
+        const pedidoCard = select.closest('.pedido-card');
 
-        if (novoStatus === statusAtual) {
-            return;
-        }
+        // Desabilitar select durante a atualização
+        select.disabled = true;
 
-        try {
-            atualizacaoEmAndamento = true;
-            pedidoCard.classList.add('loading');
-            select.disabled = true;
-
-            const response = await fetch('../../api/pedidos/atualizar-status.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    pedido_id: pedidoId,
-                    status: novoStatus
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Erro ao atualizar status');
-            }
-
+        fetch('../dashboardadmin.php?rota=pedidos', {  // URL atualizada
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                pedido_id: pedidoId,
+                status: novoStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
             if (data.success) {
+                // Atualizar o card com o novo status
                 pedidoCard.setAttribute('data-status', novoStatus);
-                select.dataset.statusAtual = novoStatus;
-                mostrarNotificacao('Status atualizado com sucesso!', 'success');
+                alert('Status atualizado com sucesso!');
             } else {
-                throw new Error(data.message || 'Erro ao atualizar status');
+                // Reverter para o status anterior em caso de erro
+                select.value = select.getAttribute('data-status-atual');
+                alert('Erro ao atualizar status: ' + data.message);
             }
-        } catch (error) {
+        })
+        .catch(error => {
             console.error('Erro:', error);
-            select.value = statusAtual;
-            mostrarNotificacao(error.message, 'error');
-        } finally {
-            pedidoCard.classList.remove('loading');
+            // Reverter para o status anterior em caso de erro
+            select.value = select.getAttribute('data-status-atual');
+            alert('Erro ao atualizar status');
+        })
+        .finally(() => {
+            // Reabilitar select após a atualização
             select.disabled = false;
-            atualizacaoEmAndamento = false;
-        }
+        });
     }
 
-    function mostrarNotificacao(mensagem, tipo) {
-        const notificacao = document.createElement('div');
-        notificacao.className = `notificacao ${tipo}`;
-        notificacao.textContent = mensagem;
-        
-        document.body.appendChild(notificacao);
-        
-        setTimeout(() => {
-            notificacao.remove();
-        }, 3000);
-    }
-
-    // Event Listeners
-    pedidosGrid.addEventListener('change', function(event) {
-        if (event.target.classList.contains('status-select')) {
-            atualizarStatusPedido(event.target);
-        }
+    // Adicionar listeners aos selects de status
+    document.querySelectorAll('.status-select').forEach(select => {
+        select.addEventListener('change', function() {
+            if (confirm('Confirma a alteração do status do pedido?')) {
+                atualizarStatusPedido(this);
+            } else {
+                // Reverter para o status anterior se cancelar
+                this.value = this.getAttribute('data-status-atual');
+            }
+        });
     });
 
-    // Filtro de status
+    // Configurar filtro de status
     document.getElementById('status-filter').addEventListener('change', function() {
         const statusSelecionado = this.value;
         const pedidos = document.querySelectorAll('.pedido-card');
