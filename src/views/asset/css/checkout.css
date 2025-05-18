@@ -10,7 +10,6 @@ body {
     font-family: 'Outfit', sans-serif;
     background-color: var(--background-color);
     margin: 0;
-    padding: 20px;
 }
 
 .container {
@@ -26,6 +25,7 @@ body {
     border-radius: 15px;
     padding: 30px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: 100vh;
 }
 
 .cart-section h2, 
@@ -112,6 +112,7 @@ body {
     background: var(--background-color);
     padding: 20px;
     border-radius: 10px;
+
 }
 
 .summary-row {
@@ -175,7 +176,7 @@ body {
 }
 
 textarea {
-    width: 100%;
+    width: 93%;
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 4px;

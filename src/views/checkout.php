@@ -16,14 +16,27 @@ $orderController = new OrderController();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finalizar Pedido - OrderFüd</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="asset/css/checkout.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+
+  
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="stela.css" />
+    <link rel="stylesheet" href="asset/css/checkout.css?dd=1">
 </head>
 <body>
+
     <div class="container">
         <div class="checkout-container">
             <div class="cart-section">
-                <h2>Shopping Cart <span id="items-count">0 Items</span></h2>
+                <h2>Carrinho de Comparas<span id="items-count">0 Items</span></h2>
                 
                 <div class="cart-items" id="cart-items-container">
                     <!-- Cart items will be dynamically added here -->
@@ -31,36 +44,34 @@ $orderController = new OrderController();
 
                 <a href="shopping.php" class="continue-shopping">
                     <i class="fas fa-arrow-left"></i> 
-                    Continue Shopping
+                    Continuar a Comprar
                 </a>
             </div>
 
             <div class="order-summary-section">
-                <h2>Order Summary</h2>
+                <h2>Resumo do pedido</h2>
                 
                 <div class="summary-details">
                     <div class="summary-row">
-                        <span>ITEMS</span>
+                        <span>ITENS</span>
                         <span id="items-total">0,00 Kz</span>
                     </div>
                     
                     <div class="summary-row">
-                        <span>SHIPPING</span>
+                        <span>Forma de pagamento</span>
                         <div class="shipping-select">
                             <select id="shipping-method">
-                                <option value="0">Standard Delivery - 0,00 Kz</option>
+                                <option value="0">Selecionar</option>
+                                <option value="0">Cash</option>
+                                <option value="0">Carteira</option>
                             </select>
                         </div>
                     </div>
                     
-                    <div class="promo-code">
-                        <span>PROMO CODE</span>
-                        <input type="text" placeholder="Enter your code">
-                        <button class="apply-btn">APPLY</button>
-                    </div>
+                 
                     
                     <div class="total-cost">
-                        <span>TOTAL COST</span>
+                        <span>TOTAL</span>
                         <span id="cart-total-summary">0,00 Kz</span>
                     </div>
                     
@@ -75,7 +86,7 @@ $orderController = new OrderController();
                         <input type="hidden" name="total" id="total-input">
                         
                         <button type="submit" class="checkout-btn">
-                            CHECKOUT
+                           Finalizar
                         </button>
                     </form>
                 </div>
@@ -93,13 +104,17 @@ $orderController = new OrderController();
                 return;
             }
 
+            console.log(cartProducts)
+
             const formattedProducts = cartProducts.map(product => ({
                 idProduto: parseInt(product.id),
                 quantidade: parseInt(product.quantity),
                 preco: parseFloat(product.price),
                 nome: product.name,
-                imagem: product.image
+                imagem: product.img
             }));
+
+            console.log(formattedProducts)
             
             updateOrderSummary(formattedProducts);
             document.getElementById('produtos-input').value = JSON.stringify(formattedProducts);
@@ -124,7 +139,7 @@ $orderController = new OrderController();
                             <img src="${product.imagem}" alt="${product.nome}">
                             <div class="product-info">
                                 <h3>${product.nome}</h3>
-                                <button class="remove-btn">Remove</button>
+                                <button class="remove-btn">Remover</button>
                             </div>
                         </div>
                         <div class="quantity-controls">
