@@ -99,33 +99,44 @@ class OrderModel {
 
     public function atualizarStatusPedido($pedidoId, $novoStatus) {
         try {
-            // Validar status permitidos
-            $statusPermitidos = ['pendente', 'em_preparo', 'pronto', 'entregue', 'cancelado'];
-            if (!in_array($novoStatus, $statusPermitidos)) {
+            // Verificar se o pedido existe
+            $sqlVerificar = "SELECT status FROM pedido WHERE idPedido = :pedido_id";
+            $stmtVerificar = $this->connection->prepare($sqlVerificar);
+            $stmtVerificar->execute([':pedido_id' => $pedidoId]);
+            
+            if (!$stmtVerificar->fetch()) {
                 return [
                     'success' => false,
-                    'message' => 'Status inválido'
+                    'message' => 'Pedido não encontrado'
                 ];
             }
 
             // Atualizar status
-            $sql = "UPDATE pedido SET status = :status WHERE idPedido = :pedido_id";
+            $sql = "UPDATE pedido SET 
+                    status = :status,
+                    data_atualizacao = CURRENT_TIMESTAMP
+                    WHERE idPedido = :pedido_id";
+                    
             $stmt = $this->connection->prepare($sql);
             $resultado = $stmt->execute([
                 ':status' => $novoStatus,
                 ':pedido_id' => $pedidoId
             ]);
 
+            if (!$resultado) {
+                throw new Exception("Erro ao atualizar status no banco de dados");
+            }
+
             return [
-                'success' => $resultado,
-                'message' => $resultado ? 'Status atualizado com sucesso' : 'Erro ao atualizar status'
+                'success' => true,
+                'message' => 'Status atualizado com sucesso'
             ];
 
         } catch (Exception $e) {
-            error_log("Erro ao atualizar status: " . $e->getMessage());
+            error_log("Erro no modelo ao atualizar status: " . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Erro ao atualizar status'
+                'message' => 'Erro ao atualizar status do pedido'
             ];
         }
     }

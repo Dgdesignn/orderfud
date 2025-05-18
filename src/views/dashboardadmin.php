@@ -1,4 +1,48 @@
-<!-- No head, adicionar os estilos -->
+<?php
+session_start();
+require_once "../controllers/employeeController.php";
+require_once "../controllers/productController.php";
+require_once "../controllers/clientController.php";
+require_once "../controllers/categoryController.php";
+require_once "../controllers/orderController.php";
+
+// Verificar se é uma requisição de atualização de status
+if (isset($_GET['rota']) && $_GET['rota'] === 'pedidos') {
+    header('Content-Type: application/json');
+    
+    try {
+        $dados = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($dados['pedido_id']) || !isset($dados['status'])) {
+            throw new Exception('Dados incompletos');
+        }
+
+        $orderController = new OrderController();
+        $resultado = $orderController->atualizarStatusPedido(
+            intval($dados['pedido_id']), 
+            $dados['status']
+        );
+
+        echo json_encode($resultado);
+        exit;
+        
+    } catch (Exception $e) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
+        exit;
+    }
+}
+
+// Resto do código do dashboard...
+if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['tipo'] !== 'funcionario') {
+    header('Location: login.php');
+    exit;
+}
+
+// No head, adicionar os estilos -->
 <link rel="stylesheet" href="asset/css/notifications.css">
 
 <!-- NAVBAR - Atualizar a seção de navegação -->
