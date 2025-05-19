@@ -165,9 +165,16 @@ $orderController = new OrderController();
 
         function removeItem(productId) {
             let cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
-            cartProducts = cartProducts.filter(p => p.id !== productId);
+            cartProducts = cartProducts.filter(p => p.idProduto !== productId);
             localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
             
+            // Remover elemento do DOM
+            const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
+            if (itemElement) {
+                itemElement.remove();
+            }
+
+            // Redirecionar se carrinho vazio
             if (cartProducts.length === 0) {
                 window.location.href = 'shopping.php';
             } else {
