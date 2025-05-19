@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if(!isset($_SESSION["client"])){
@@ -20,7 +19,7 @@ $orderController = new OrderController();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
 
-  
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -37,7 +36,7 @@ $orderController = new OrderController();
         <div class="checkout-container">
             <div class="cart-section">
                 <h2>Carrinho de Comparas<span id="items-count">0 Items</span></h2>
-                
+
                 <div class="cart-items" id="cart-items-container">
                     <!-- Cart items will be dynamically added here -->
                 </div>
@@ -50,13 +49,13 @@ $orderController = new OrderController();
 
             <div class="order-summary-section">
                 <h2>Resumo do pedido</h2>
-                
+
                 <div class="summary-details">
                     <div class="summary-row">
                         <span>ITENS</span>
                         <span id="items-total">0,00 Kz</span>
                     </div>
-                    
+
                     <div class="summary-row">
                         <span>Forma de pagamento</span>
                         <div class="shipping-select" id="payment-info">
@@ -68,17 +67,17 @@ $orderController = new OrderController();
                                 </select>
                             </div>
                         </div>
-                        
-                        
+
+
                     </div>
-                    
-                 
-                    
+
+
+
                     <div class="total-cost">
                         <span>TOTAL</span>
                         <span id="cart-total-summary">0,00 Kz</span>
                     </div>
-                    
+
                     <form method="POST" action="../controllers/processar_pedido.php">
                         <div class="form-group">
                             <label for="observacoes">Observações do Pedido:</label>
@@ -88,8 +87,8 @@ $orderController = new OrderController();
 
                         <input type="hidden" name="produtos" id="produtos-input">
                         <input type="hidden" name="total" id="total-input">
-                        
-                        <button type="submit" class="checkout-btn">
+
+                        <button type="submit" id="checkout-button" class="checkout-btn" disabled>
                            Finalizar
                         </button>
                     </form>
@@ -104,10 +103,14 @@ $orderController = new OrderController();
         function handlePaymentMethod(method) {
             const paymentInfo = document.getElementById('payment-info');
             const total = parseFloat(document.getElementById('total-input').value);
+            const checkoutButton = document.getElementById('checkout-button');
             const sm = document.querySelector('.payment-message')
             if(sm){
                 sm.forEach(el => el.remove());
             }
+
+            // Habilita o botão apenas se um método de pagamento for selecionado
+            checkoutButton.disabled = !method;
 
             if (method === 'cash') {
 
@@ -117,7 +120,7 @@ $orderController = new OrderController();
                 if (userWalletBalance < total) {
                     showInsufficientFundsModal();
                 } else {
-                   
+
                     let elemento = `
                     <p class="payment-message">Saldo disponível:</p>
                     <p class="payment-message"> ${userWalletBalance}</p>
@@ -154,11 +157,19 @@ $orderController = new OrderController();
 
         function updateItemQuantity(productId, change) {
             const cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
-            const product = cartProducts.find(p => p.id === productId);
-            
+            const product = cartProducts.find(p => p.idProduto === productId);
+
             if (product) {
-                product.quantity = Math.max(1, product.quantity + change);
+                const newQuantity = Math.max(1, parseInt(product.quantidade) + change);
+                product.quantidade = newQuantity;
                 localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
+
+                // Atualiza o input de quantidade no DOM
+                const quantityInput = document.querySelector(`[data-product-id="${productId}"] input[type="number"]`);
+                if (quantityInput) {
+                    quantityInput.value = newQuantity;
+                }
+
                 updateOrderSummary(cartProducts);
             }
         }
@@ -167,7 +178,7 @@ $orderController = new OrderController();
             let cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
             cartProducts = cartProducts.filter(p => p.idProduto !== productId);
             localStorage.setItem('cartProducts', JSON.stringify(cartProducts));
-            
+
             // Remover elemento do DOM
             const itemElement = document.querySelector(`[data-product-id="${productId}"]`);
             if (itemElement) {
@@ -184,7 +195,7 @@ $orderController = new OrderController();
 
         document.addEventListener('DOMContentLoaded', function() {
             const cartProducts = JSON.parse(localStorage.getItem('cartProducts')) || [];
-            
+
             if (cartProducts.length === 0) {
                 alert('Seu carrinho está vazio!');
                 window.location.href = 'shopping.php';
@@ -202,7 +213,7 @@ $orderController = new OrderController();
             }));
 
             console.log(formattedProducts)
-            
+
             updateOrderSummary(formattedProducts);
             document.getElementById('produtos-input').value = JSON.stringify(formattedProducts);
             document.getElementById('items-count').textContent = `${formattedProducts.length} Items`;
@@ -215,13 +226,13 @@ $orderController = new OrderController();
             let total = 0;
 
             cartContainer.innerHTML = '';
-            
+
             products.forEach(product => {
                 const itemTotal = product.preco * product.quantidade;
                 total += itemTotal;
 
                 cartContainer.innerHTML += `
-                    <div class="cart-item">
+                    <div class="cart-item" data-product-id="${product.idProduto}">
                         <div class="product-details">
                             <img src="${product.imagem}" alt="${product.nome}">
                             <div class="product-info">
@@ -234,8 +245,8 @@ $orderController = new OrderController();
                             <input type="number" value="${product.quantidade}" readonly>
                             <button class="quantity-btn" onclick="updateItemQuantity(${product.idProduto}, 1)">+</button>
                         </div>
-                       
-                       
+
+
                         <div class="total">${formatCurrency(itemTotal)}</div>
                     </div>
                 `;
