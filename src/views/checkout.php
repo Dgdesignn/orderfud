@@ -59,14 +59,17 @@ $orderController = new OrderController();
                     
                     <div class="summary-row">
                         <span>Forma de pagamento</span>
-                        <div class="shipping-select">
-                        <select id="shipping-method" onchange="handlePaymentMethod(this.value)">
-                            <option value="">Selecionar</option>
-                            <option value="cash">Cash</option>
-                            <option value="carteira">Carteira</option>
-                        </select>
-                        <div id="payment-info" class="payment-info"></div>
-                    </div>
+                        <div class="shipping-select" id="payment-info">
+                            <div>
+                                <select id="shipping-method" onchange="handlePaymentMethod(this.value)">
+                                    <option value="">Selecionar</option>
+                                    <option value="cash">Cash</option>
+                                    <option value="carteira">Carteira</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        
                     </div>
                     
                  
@@ -96,22 +99,38 @@ $orderController = new OrderController();
     </div>
 
     <script>
-        let userWalletBalance = 1000; // Substitua pelo valor real da carteira do usuário
+        let userWalletBalance = 400000; // Substitua pelo valor real da carteira do usuário
 
         function handlePaymentMethod(method) {
             const paymentInfo = document.getElementById('payment-info');
             const total = parseFloat(document.getElementById('total-input').value);
+            const sm = document.querySelector('.payment-message')
+            if(sm){
+                sm.forEach(el => el.remove());
+            }
 
             if (method === 'cash') {
-                paymentInfo.innerHTML = '<p class="payment-message">O pagamento deve ser feito no momento da entrega.</p>';
+
+                let element = '<p class="payment-message">O pagamento deve ser feito no momento da entrega.</p>';
+                paymentInfo.insertAdjacentHTML('afterend', element)
             } else if (method === 'carteira') {
                 if (userWalletBalance < total) {
                     showInsufficientFundsModal();
                 } else {
-                    paymentInfo.innerHTML = `<p class="payment-message">Saldo disponível: ${formatCurrency(userWalletBalance)}</p>`;
+                   
+                    let elemento = `
+                    <p class="payment-message">Saldo disponível:</p>
+                    <p class="payment-message"> ${userWalletBalance}</p>
+                    <p class="payment-message">Valor a Debita:  </p>
+                    <p class="payment-message">-${total}</p>
+                    <p class="payment-message">Saldo Actual:</p>
+                    <p class="payment-message">  ${userWalletBalance}</p>
+                    `;
+                    paymentInfo.insertAdjacentHTML('afterend', elemento)
                 }
             } else {
-                paymentInfo.innerHTML = '';
+                let spn = "<span></span> <span></span>"
+                 paymentInfo.insertAdjacentHTML('afterend', spn)
             }
         }
 
@@ -208,10 +227,8 @@ $orderController = new OrderController();
                             <input type="number" value="${product.quantidade}" readonly>
                             <button class="quantity-btn" onclick="updateItemQuantity(${product.idProduto}, 1)">+</button>
                         </div>
-                        <button class="remove-btn" onclick="removeItem(${product.idProduto})">
-                            <i class="fas fa-trash"></i> Remover
-                        </button>
-                        <div class="price">${formatCurrency(product.preco)}</div>
+                       
+                       
                         <div class="total">${formatCurrency(itemTotal)}</div>
                     </div>
                 `;
